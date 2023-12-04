@@ -9,5 +9,6 @@ export interface AutoCompleteV2Props {
     selectedSuggestion: any | null;
     disabled?: boolean;
     isError?:boolean;
+    externalInputValue?: string; 
   }
   

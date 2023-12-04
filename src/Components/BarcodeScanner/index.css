@@ -1,0 +1,14 @@
+#qr-reader select {
+    background-color: transparent !important;
+}
+
+/* Açık tema için */
+#qr-reader select option {
+    background-color: rgb(250, 250, 250) !important;
+}
+  
+/* Karanlık tema için */
+.dark #qr-reader select option {
+background-color: rgb(86, 86, 86) !important;
+}
+  

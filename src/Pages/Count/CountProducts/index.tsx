@@ -151,6 +151,7 @@ const CountProducts: React.FC = () => {
                 selectedSuggestion={selectedProduct}
                 placeholder="Ürün barkodu ara..."
                 isError={isFormInvalid && !selectedProduct}
+                externalInputValue={barcodeValue}
               />
               <button type="button" onClick={() => setShowScanner(true)} className="p-2 text-xl bg-background-light text-text-darkest dark:bg-background-darkest dark:text-text-lightest rounded-lg hover:text-primary hover:dark:text-primary transition-colors duration-300 ease-in-out">
                 <FaQrcode />

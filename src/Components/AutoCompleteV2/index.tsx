@@ -11,6 +11,7 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
   onSelect,
   disabled = false,
   isError= false,
+  externalInputValue
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [debouncedValue, setDebouncedValue] = useState<string>(inputValue);
@@ -23,7 +24,7 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
   const updateDebouncedValue = useCallback(
     debounce((nextValue) => {
       setDebouncedValue(nextValue);
-    }, 300),
+    }, 500),
     []
   );
 
@@ -35,7 +36,15 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
       setSuggestions(dataSuggestions);
     }
   }, [dataSuggestions]);
+  
+  useEffect(() => {
+    if (externalInputValue !== undefined && externalInputValue !== inputValue) {
+      setInputValue(externalInputValue);
+      setDebouncedValue(externalInputValue);
+      setShowSuggestions(true);
 
+    }
+  }, [externalInputValue]);
 
   useEffect(() => {
     if (!selectedSuggestion) {
