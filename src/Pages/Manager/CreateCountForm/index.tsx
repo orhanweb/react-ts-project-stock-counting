@@ -13,7 +13,7 @@ import DatePicker from 'react-datepicker'; // Date picker için önerilen bir pa
 const CreateCountForm: React.FC = () => {
   const [countName, setCountName] = useState('');
   const [dateRange, setDateRange] = useState<[Date?, Date?]>([undefined, undefined]);
-  const [selectedStore, setSelectedStore] = useState('');
+  //const [selectedStore, setSelectedStore] = useState('');
   // Diğer state'ler ve ilgili işlevsellikler...
 
   const handleSubmit = (event: React.FormEvent) => {
