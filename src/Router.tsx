@@ -8,7 +8,7 @@ import ShowCounted from './Pages/Count/ShowCounted';
 
 const routes: RouteObject[] = [
   {
-    path: '/', element: <Layout />,
+    path: '/stock-count-ts-app', element: <Layout />,
     children: [
       {
         index: true,
