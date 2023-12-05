@@ -15,13 +15,13 @@ const routes: RouteObject[] = [
         element: <Navigate replace to="/stock-count-ts-app/count/products"  />
       },
       {
-        path: '/stock-count-ts-app/manager',children: [      // Routings for managers
+        path: 'manager',children: [      // Routings for managers
           { path: 'create-counts',element: <CreateCountForm />},
           { path: 'view-counts',element: <ViewCounts />},
         ]
       },
       {
-        path: '/stock-count-ts-app/count',children: [// Routing for protuct counting
+        path: 'count',children: [// Routing for protuct counting
           { path: 'products',element: <CountProducts />},
           { path: 'show-counted',element: <ShowCounted />},]
       },
