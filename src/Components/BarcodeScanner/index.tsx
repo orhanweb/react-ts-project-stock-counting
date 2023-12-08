@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import './index.css';
+import { BrowserMultiFormatReader } from '@zxing/library';
  
 interface BarcodeScannerProps {
   onClose: () => void;
@@ -8,37 +7,45 @@ interface BarcodeScannerProps {
 }
 
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, setBarcodeValue }) => {
-  // useRef ile Html5QrcodeScanner nesnesi için bir referans oluşturuyoruz
-  const html5QrCodeRef = useRef<Html5QrcodeScanner | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if(html5QrCodeRef.current?.getState() === undefined ){
-       html5QrCodeRef.current = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
-       html5QrCodeRef.current.render(onScanSuccess, onScanFailure);
+    const codeReader = new BrowserMultiFormatReader();
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then((stream) => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          codeReader.decodeFromVideoElement(videoRef.current)
+            .then((result) => {
+              setBarcodeValue(result.getText());
+              closeScanner();  
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    return () =>  {
+      codeReader.reset();
     }
   }, []);
+
    
-  const onScanSuccess = (decodedText: string) => {
-    setBarcodeValue(decodedText);
-    // Scanner'ı temizliyoruz
-    handleClose();
-  };
-
-  const onScanFailure = (_: string) => {
-    // Hata mesajlarını console'a yazdırıyoruz
-    //console.error(`QR Code scanning error: ${error}`);
-  };
-
-  // onClose metodunu güncelledik, böylece artık Html5QrcodeScanner instance'ını temizleyebilir
-  const handleClose = () => {
-    html5QrCodeRef.current?.clear();
+  const closeScanner = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+    }
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40" onClick={handleClose}>
-      <div className="p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest  z-50 w-min h-min" onClick={(e) => e.stopPropagation()}>
-        <div id="qr-reader"></div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40" onClick={closeScanner}>
+      <div className="p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 w-auto m-2" onClick={(e) => e.stopPropagation()}>
+        <video ref={videoRef}/>
       </div>
     </div>
   );

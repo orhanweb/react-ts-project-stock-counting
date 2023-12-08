@@ -190,9 +190,13 @@ const CountProducts: React.FC = () => {
             <p className='text-center text-text-light'>Stok Girmek İçin Ürün Seçin</p>
           )}
         </div>
-
-        {/* Barkod/QR Kod Okuyucu */}
-        {showScanner && <BarcodeScanner onClose={() => setShowScanner(false)} setBarcodeValue={setBarcodeValue} />}
+        {/* Barkod okuma bileşeni */}
+        {showScanner && (
+        <BarcodeScanner 
+          onClose={() => setShowScanner(false)}
+          setBarcodeValue={setBarcodeValue}
+        />
+      )}
         <button type="submit" className="mt-4 px-4 py-2 bg-primary dark:bg-primary-darkest text-text-lightest rounded-lg hover:bg-primary-light hover:dark:bg-primary-darker transition-colors duration-300 ease-in-out">
           Gönder
         </button>
