@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/library';
- 
+
 interface BarcodeScannerProps {
   onClose: () => void;
   setBarcodeValue: React.Dispatch<React.SetStateAction<string>>;
@@ -8,33 +8,36 @@ interface BarcodeScannerProps {
 
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, setBarcodeValue }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [cameraPermissionDenied, setCameraPermissionDenied] = useState(false);
+  const [barcodeReadError, setBarcodeReadError] = useState(false);
 
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then((stream) => {
+        setCameraPermissionDenied(false); // Reset the permission state
+        setBarcodeReadError(false); // Reset the read error state
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           codeReader.decodeFromVideoElement(videoRef.current)
             .then((result) => {
               setBarcodeValue(result.getText());
-              closeScanner();  
+              closeScanner();
             })
-            .catch((error) => {
-              console.error(error);
+            .catch((_) => {
+              setBarcodeReadError(true); // Set read error state to true
             });
         }
       })
-      .catch((error) => {
-        console.error(error);
+      .catch((_) => {
+        setCameraPermissionDenied(true); // Set permission state to denied
       });
 
-    return () =>  {
+    return () => {
       codeReader.reset();
     }
   }, []);
 
-   
   const closeScanner = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
@@ -44,8 +47,15 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, setBarcodeValu
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40" onClick={closeScanner}>
-      <div className="p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 w-auto m-2" onClick={(e) => e.stopPropagation()}>
-        <video ref={videoRef}/>
+      <div className="p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 max-w-[90%] max-h-[75%] md:max-w-[75%] md:max-h-[75%] lg:max-w-[50%] lg:max-h-[50%] m-2 transition-all duration-300 ease-in-out" onClick={(e) => e.stopPropagation()}>
+        {cameraPermissionDenied ? (
+          <p>Lütfen Kamera İzni Verin</p>
+        ) : (
+          <>
+            <video ref={videoRef} />
+            {barcodeReadError && <p className="text-center mt-2">Barkod Okunamadı Tekrar Deneyin</p>}
+          </>
+        )}
       </div>
     </div>
   );
