@@ -47,12 +47,12 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, setBarcodeValu
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40" onClick={closeScanner}>
-      <div className="p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 max-w-[90%] max-h-[75%] md:max-w-[75%] md:max-h-[75%] lg:max-w-[50%] lg:max-h-[50%] m-2 transition-all duration-300 ease-in-out" onClick={(e) => e.stopPropagation()}>
+      <div className="overflow-hidden p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 w-[90%] max-h-[75%] md:w-[75%] md:max-h-[75%] lg:max-w-[50%] lg:max-h-[75%] flex flex-col justify-center items-center m-2 transition-all duration-300 ease-in-out" onClick={(e) => e.stopPropagation()}>
         {cameraPermissionDenied ? (
           <p>Lütfen Kamera İzni Verin</p>
         ) : (
           <>
-            <video ref={videoRef} />
+            <video ref={videoRef} className='rounded-lg'/>
             {barcodeReadError && <p className="text-center mt-2">Barkod Okunamadı Tekrar Deneyin</p>}
           </>
         )}
