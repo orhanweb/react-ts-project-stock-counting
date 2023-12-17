@@ -3,10 +3,9 @@ import { BrowserMultiFormatReader } from '@zxing/library';
 
 interface BarcodeScannerProps {
   onClose: () => void;
-  setBarcodeValue: React.Dispatch<React.SetStateAction<string>>;
-}
+  onBarcodeScanned: (barcode: string) => void;}
 
-const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, setBarcodeValue }) => {
+const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, onBarcodeScanned }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraPermissionDenied, setCameraPermissionDenied] = useState(false);
   const [barcodeReadError, setBarcodeReadError] = useState(false);
@@ -21,17 +20,13 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onClose, setBarcodeValu
           videoRef.current.srcObject = stream;
           codeReader.decodeFromVideoElement(videoRef.current)
             .then((result) => {
-              setBarcodeValue(result.getText());
+              onBarcodeScanned(result.getText());
               closeScanner();
             })
-            .catch((_) => {
-              setBarcodeReadError(true); // Set read error state to true
-            });
+            .catch((_) => setBarcodeReadError(true));
         }
       })
-      .catch((_) => {
-        setCameraPermissionDenied(true); // Set permission state to denied
-      });
+      .catch((_) => setCameraPermissionDenied(true));
 
     return () => {
       codeReader.reset();

@@ -37,6 +37,7 @@ const CountProducts: React.FC = () => {
   const [barcodeValue, setBarcodeValue] = useState<string>('');
   const [showBarcodeInput, setShowBarcodeInput] = useState<boolean>(true);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
+  const [ignoreReset, setIgnoreReset] = useState(false);
 
   // Seçilen ürün değiştiğinde unitValues state'ini güncelle
   useEffect(() => {
@@ -72,7 +73,7 @@ const CountProducts: React.FC = () => {
     setSelectedProduct(null);
   };
   
-  
+  // Ürün Adı veya Barkod girişi arasında seçim yapmayı sağlayan fonksiyon
   const toggleInputType = () => {
     setSelectedProduct(null);
     setShowBarcodeInput(!showBarcodeInput);
@@ -82,7 +83,20 @@ const CountProducts: React.FC = () => {
   const handleUnitChange = (unitType: string, value: string) => {
     setUnitValues({ ...unitValues, [unitType]: value });
   };
-  
+
+  // Eğer barkod taranırsa çalışan fonksiyon
+  const handleBarcodeScanned = (scannedBarcode:string) => {
+    setIgnoreReset(true);
+    setSelectedProduct(null);
+    setBarcodeValue(scannedBarcode);
+
+    // Sonraki render döngüsünde ignoreReset false oluyo
+    setTimeout(() => {
+      setBarcodeValue('');
+      setIgnoreReset(false);
+    }, 600);
+  }
+
   // LOCATION AUTO COMPLETE COMPONENTS VARIABLES
   const autoCompleteFields: AutoCompleteProps[] = [
     {
@@ -116,8 +130,8 @@ const CountProducts: React.FC = () => {
   ];
 
   return (
-    <div className="w-full lg:w-3/4 mx-auto"> {/* Genişlik ve padding ayarlamaları */}
-      <h1 className="text-center text-2xl md:text-3xl lg:text-4xl mt-8 mb-4">Ürün Sayım Sayfası</h1>
+    <div className="count-products-page w-full lg:w-3/4 mx-auto"> {/* Genişlik ve padding ayarlamaları */}
+      <h1 className="text-center text-2xl md:text-3xl lg:text-4xl mt-8 mb-4">Ürün Sayım</h1>
       <form onSubmit={handleSubmit} className="flex flex-col items-center">
         <h2 className="text-center text-xl md:text-2xl lg:text-3xl mt-2">Konum Seç</h2> 
         <div className="konum-secimi flex flex-col lg:flex-row w-full items-center justify-center gap-4 py-4">
@@ -152,6 +166,7 @@ const CountProducts: React.FC = () => {
                 placeholder="Ürün barkodu ara..."
                 isError={isFormInvalid && !selectedProduct}
                 externalInputValue={barcodeValue}
+                ignoreResetOnSelectedSuggestionNull={ignoreReset}
               />
               <button type="button" onClick={() => setShowScanner(true)} className="p-2 text-xl bg-background-light text-text-darkest dark:bg-background-darkest dark:text-text-lightest rounded-lg hover:text-primary hover:dark:text-primary transition-colors duration-300 ease-in-out">
                 <FaQrcode />
@@ -179,7 +194,7 @@ const CountProducts: React.FC = () => {
                     key={unitType}
                     type="number"
                     placeholder={`${unitType} Miktarı`}
-                    className='w-full border rounded p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out'
+                    className='w-full border rounded-lg p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out'
                     id={unitType}
                     value={unitValues[unitType]}
                     onChange={(e) => handleUnitChange(unitType, e.target.value)}
@@ -192,11 +207,11 @@ const CountProducts: React.FC = () => {
         </div>
         {/* Barkod okuma bileşeni */}
         {showScanner && (
-        <BarcodeScanner 
-          onClose={() => setShowScanner(false)}
-          setBarcodeValue={setBarcodeValue}
-        />
-      )}
+          <BarcodeScanner 
+            onClose={() => setShowScanner(false)}
+            onBarcodeScanned={handleBarcodeScanned}
+          />
+        )}
         <button type="submit" className="mt-4 px-4 py-2 bg-primary dark:bg-primary-darkest text-text-lightest rounded-lg hover:bg-primary-light hover:dark:bg-primary-darker transition-colors duration-300 ease-in-out">
           Gönder
         </button>

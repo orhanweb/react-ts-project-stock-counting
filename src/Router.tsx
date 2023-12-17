@@ -8,11 +8,11 @@ import ShowCounted from './Pages/Count/ShowCounted';
 
 const routes: RouteObject[] = [
   {
-    path: '/stock-count-ts-app', element: <Layout />,
+    path: '/', element: <Layout />,
     children: [
       {
         index: true,
-        element: <Navigate replace to="/stock-count-ts-app/count/products"  />
+        element: <Navigate replace to="/count/products"  />
       },
       {
         path: 'manager',children: [      // Routings for managers

@@ -23,7 +23,7 @@ const CustomTextInput: React.FC<CustomTextInputProps>=({id,label,value,onChange,
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="border-2 bg-transparent border-background p-2 rounded-xl w-full focus:border-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300"
+            className="border-2 bg-transparent border-background p-2 rounded-lg w-full focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300"
         />
         <div className="text-right text-xs font-mono mt-1 mr-2 cursor-default">
             {value.length}/{maxChars}

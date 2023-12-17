@@ -18,8 +18,9 @@ const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({ label, st
         startDate={startDate}
         endDate={endDate}
         onChange={onChange}
+        placeholderText='gg/aa/yyyy - gg/aa/yyyy'
         dateFormat="dd/MM/yyyy"        
-        className="form-control w-full p-2 border-2 border-background bg-transparent rounded-xl focus:outline-none focus:border-primary text-text-darkest dark:text-text-lightest transition-colors duration-300"
+        className="form-control w-full p-2 border-2 border-background bg-transparent rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300"
       />
     </div>
   );

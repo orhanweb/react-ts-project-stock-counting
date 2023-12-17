@@ -11,7 +11,8 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
   onSelect,
   disabled = false,
   isError= false,
-  externalInputValue
+  externalInputValue,
+  ignoreResetOnSelectedSuggestionNull = false
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [debouncedValue, setDebouncedValue] = useState<string>(inputValue);
@@ -38,16 +39,16 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
   }, [dataSuggestions]);
   
   useEffect(() => {
-    if (externalInputValue !== undefined && externalInputValue !== inputValue) {
+    // Sadece externalInputValue boş string değilse güncelle
+    if (externalInputValue !== undefined && externalInputValue !== '' && externalInputValue !== inputValue) {
       setInputValue(externalInputValue);
       setDebouncedValue(externalInputValue);
       setShowSuggestions(true);
-
-    }
+    }  
   }, [externalInputValue]);
 
   useEffect(() => {
-    if (!selectedSuggestion) {
+    if (!selectedSuggestion && !ignoreResetOnSelectedSuggestionNull) {
       setInputValue(''); // input değerini sıfırla
       setDebouncedValue(''); // debounced değeri sıfırla
       setShowSuggestions(false); // öneri listesini kapat
@@ -97,7 +98,7 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className={`${isError ? 'border-error' : ''} w-full border rounded p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out`}
+        className={`${isError ? 'border-error' : ''} w-full border rounded-lg p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out`}
         placeholder={placeholder}
         disabled={disabled}
         onFocus={()=>setShowSuggestions(true)}

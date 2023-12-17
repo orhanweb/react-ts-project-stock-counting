@@ -1,6 +1,5 @@
 {
   "name": "stock-count-app",
-  "homepage": "https://orhanweb.github.io/stock-count-ts-app/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,7 +14,6 @@
     "@tailwindcss/forms": "^0.5.7",
     "@zxing/library": "^0.20.0",
     "date-fns": "^2.30.0",
-    "html5-qrcode": "^2.3.8",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-datepicker": "^4.21.0",
