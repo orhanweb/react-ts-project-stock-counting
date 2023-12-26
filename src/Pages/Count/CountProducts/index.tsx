@@ -8,12 +8,7 @@ import { useGetProductNamesQuery,useGetBarcodesQuery } from '../../../Redux/Serv
 import { MdSwapHoriz } from 'react-icons/md';
 import { FaQrcode } from "react-icons/fa6";
 import BarcodeScanner from '../../../Components/BarcodeScanner';
-
-// Genel wrapper fonksiyonu
-const useQueryWrapper = (queryHook: any, queryArg: any, skip: boolean) => {
-  const { data, isFetching } = queryHook(queryArg, { skip });
-  return { data, isFetching };
-};
+import { useQueryWrapper } from '../../../Hooks/useQueryWrapper';
 
 // Ürün birim türlerini ayrıştıran fonksiyon
 const getUnitTypes = (product: Product) => {

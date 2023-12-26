@@ -3,10 +3,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux'; // Provider'ı import edin
-import { store } from './Redux/store'; // store'u doğru yoldan import edin
+import { Provider } from 'react-redux';
+import { store } from './Redux/store';
 import App from './App';
 import './index.css';
+import { NotificationProvider } from './Contexts/notificationContext';
 
 const currentTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.classList.add(currentTheme);
@@ -19,7 +20,9 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <App />
+        <NotificationProvider>
+          <App />
+        </NotificationProvider>
       </BrowserRouter>
     </Provider>
   </React.StrictMode>

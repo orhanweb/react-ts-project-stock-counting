@@ -1,15 +1,11 @@
 // CountTypeSelector.tsx
 import React from 'react';
-
-interface CountTypeSelectorProps {
-  countType: string;
-  setCountType: (type: string) => void;
-}
+import { CountType, CountTypeSelectorProps } from './index.d';
 
 const countTypes = [
-  { value: 'depot', label: 'Depo' },
-  { value: 'market', label: 'Market' },
-  { value: 'vehicle', label: 'Araç' },
+  { value: CountType.Depo, label: 'Depo' },
+  { value: CountType.Market, label: 'Market' },
+  { value: CountType.Vehicle, label: 'Araç' },
 ];
 
 const CountTypeSelector: React.FC<CountTypeSelectorProps> = ({ countType, setCountType }) => {
