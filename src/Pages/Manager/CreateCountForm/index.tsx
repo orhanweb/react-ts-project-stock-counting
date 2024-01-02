@@ -108,15 +108,6 @@ const CreateCountForm : React.FC = () => {
         <button type="submit" className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
           Sayım Oluştur
         </button>
-        <button type="button" onClick={()=> addNotification("Bilgi verdim", NotificationType.Info)} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
-          Bilgi
-        </button>
-        <button type="button" onClick={()=> addNotification("İşlem başarılıı.", NotificationType.Success)} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
-          Başarılı
-        </button>
-        <button type="button" onClick={()=> addNotification("Bu işte bir terslik var df sd sdf asdfasd asdfd ama yinede kontrol etmekte fayda var.", NotificationType.Warning)} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
-          Uyarı
-        </button>
       </form>
     </div>
   );
