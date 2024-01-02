@@ -1,7 +1,11 @@
-import { NotificationType } from "../../Contexts/notificationContext";
+import React, { useEffect } from 'react';
+import { NotificationProps, NotificationType } from "../../Components/Notification/index.d";
 import { MdError} from "react-icons/md";
 import { PiInfoFill } from "react-icons/pi";
 import { HiCheckCircle } from "react-icons/hi";
+import './index.css'; // CSS dosyasını import edin
+
+const NOTIFICATION_TIMEOUT = 3000; // 3 saniyelik zaman aşımı süresi
 
 // İkon Fonksiyonu
 const getIconForType = (type: NotificationType) => {
@@ -37,13 +41,21 @@ const getIconForType = (type: NotificationType) => {
   };
   
 // Notification Bileşeni
-const Notification: React.FC<{ message: string; type: NotificationType }> = ({ message, type }) => {
-    return (
-      <div className={`flex items-center py-1 pl-1 pr-2 ${getBackgroundColorForType(type)} rounded-full text-text-lightest`}>
-        {getIconForType(type)}
-        <span className="ml-1">{message}</span>
-      </div>
-    );
+const Notification: React.FC<NotificationProps> = ({ id, message, type, removeSelf }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      removeSelf(id);
+    }, NOTIFICATION_TIMEOUT);
+
+    return () => clearTimeout(timer);
+  }, [id, removeSelf]);
+  
+  return (
+    <div id={`notification-${id}`} className={`flex items-center py-1 pl-1 pr-2 ${getBackgroundColorForType(type)} rounded-full text-text-lightest w-fit max-w-md`}>
+      {getIconForType(type)}
+      <span className="ml-1 break-word">{message}</span>
+    </div>
+  );
 };
 
 export default Notification;

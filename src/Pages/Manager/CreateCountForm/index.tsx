@@ -9,7 +9,7 @@ import { useQueryWrapper } from '../../../Hooks/useQueryWrapper';
 import { useGetMarketsQuery } from '../../../Redux/Services/countLocationAPI';
 import { Market } from '../../../Redux/Models/apiTypes';
 import { useNotifications } from '../../../Hooks/useNotifications';
-import { NotificationType } from '../../../Contexts/notificationContext';
+import { NotificationType } from '../../../Components/Notification/index.d';
 
 const CreateCountForm : React.FC = () => {
   const [countName, setCountName] = useState('');
@@ -114,7 +114,7 @@ const CreateCountForm : React.FC = () => {
         <button type="button" onClick={()=> addNotification("İşlem başarılıı.", NotificationType.Success)} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
           Başarılı
         </button>
-        <button type="button" onClick={()=> addNotification("Bu işte bir terslik var.", NotificationType.Warning)} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
+        <button type="button" onClick={()=> addNotification("Bu işte bir terslik var df sd sdf asdfasd asdfd ama yinede kontrol etmekte fayda var.", NotificationType.Warning)} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
           Uyarı
         </button>
       </form>

@@ -1,21 +1,6 @@
 import React, { createContext, useState, ReactNode } from 'react';
 import Notification from '../Components/Notification';
-
-// Notification türünü belirleme
-interface INotification {
-  id: number;
-  message: string;
-  type: NotificationType;
-}
-
-// Bildirim tiplerini enum olarak tanımlama
-export enum NotificationType {
-  Warning = 'warning',
-  Info = 'info',
-  Error = 'error',
-  Success = 'success'
-}
-const NOTIFICATION_TIMEOUT = 3000; // 3 saniyelik zaman aşımı süresi
+import { NotificationProps, NotificationType } from '../Components/Notification/index.d';
 
 // Context için interface tanımı
 interface INotificationContext {
@@ -29,7 +14,7 @@ interface NotificationProviderProps {
 }
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
-  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
   const removeNotification = (id: number) => {
     setNotifications(notifications => notifications.filter(notification => notification.id !== id));
@@ -38,23 +23,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const addNotification = (message: string, type: NotificationType) => {
     const id = new Date().getTime();
     setNotifications(prev => {
-      const newNotifications = [{ id, message, type }, ...prev];
+      const newNotification = { id, message, type, removeSelf: removeNotification };
+      const newNotifications = [newNotification, ...prev];
+
+      // Listenin boyutu 3'ten büyükse, 3. elemandan sonraki tüm bildirimleri sil
       if (newNotifications.length > 3) {
-        newNotifications.length = 3; // En fazla 3 bildirim tut
+        newNotifications.slice(3).forEach(notification => notification.removeSelf(notification.id));
       }
+      
       return newNotifications;
     });
-
-    setTimeout(() => removeNotification(id), NOTIFICATION_TIMEOUT);
   };
 
    return (
     <NotificationContext.Provider value={{ addNotification }}>
       {children}
-      <div className="absolute top-5 right-5 space-y-2">
+      <div className="z-50 absolute top-5 left-1/2 transform -translate-x-1/2 w-5/6 sm:w-auto sm:translate-x-0 sm:right-5 space-y-2 flex flex-col sm:items-end items-center">
+        
         {notifications.map((notification) => (
-          <Notification key={notification.id} message={notification.message} type={notification.type} />
-        ))}
+          <Notification key={notification.id} {...notification} />
+          ))}
       </div>
     </NotificationContext.Provider>
   );
