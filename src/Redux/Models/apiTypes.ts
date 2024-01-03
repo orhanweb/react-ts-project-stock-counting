@@ -82,3 +82,11 @@ export interface Product {
     unit3: string;
     unit3mult: string | number;
 }
+
+export interface CountFormData {
+    countName: string;
+    startDate: Date;
+    endDate: Date;
+    countType: string;
+    selectedStructureId: number;
+}  

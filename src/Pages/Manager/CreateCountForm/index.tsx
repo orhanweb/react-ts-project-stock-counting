@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CustomTextInput from '../../../Components/CustomTextInput';
 import "react-datepicker/dist/react-datepicker.css";
 import CountTypeSelector from '../../../Components/CountTypeSelector';
@@ -10,21 +10,29 @@ import { Market } from '../../../Redux/Models/apiTypes';
 import { useNotifications } from '../../../Hooks/useNotifications';
 import { NotificationType } from '../../../Components/Notification/index.d';
 import CustomDatePicker from '../../../Components/CustomDatePicker';
+import { useAddCountFormMutation } from '../../../Redux/Services/countFormAPI';
 
 const CreateCountForm : React.FC = () => {
   const [countName, setCountName] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [countType, setCountType] = useState<CountType>(CountType.Market);
-  const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
+  const [selectedStructure, setSelectedStructure] = useState<Market | null>(null); //  | Vehicle | Depot Şimdilik bu genişletilebilir yapı yorum satırında dursun. 
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   
   const { addNotification } = useNotifications(); // Bildirim ekleme fonksiyonu
+  const [addCountForm, { isLoading }] = useAddCountFormMutation();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  useEffect(() => {
+    // countType değiştiğinde selectedStructure state'ini sıfırla
+    setSelectedStructure(null);
+  }, [countType]);
+  
+
+  const handleSubmit = async(event: React.FormEvent) => {
     event.preventDefault();
     // Eğer zorunlu statelerden herhangi biri boşsa, işlemi durdur
-    if (!countName || !startDate || !endDate || !selectedMarket) {
+    if (!countName || !startDate || !endDate || !selectedStructure) {
       setIsFormInvalid(true);
       addNotification("Form da boş alan var.", NotificationType.Error);
       return; 
@@ -44,7 +52,22 @@ const CreateCountForm : React.FC = () => {
     }
 
     setIsFormInvalid(false);
-    console.log('Form submitted:', countName, startDate, endDate, countType);
+    try {
+      await addCountForm({
+        countName,
+        startDate,
+        endDate,
+        countType, // Enum değeri, API'ye string olarak gidecek
+        selectedStructureId: selectedStructure.id
+      }).unwrap();
+
+      addNotification("Sayım başarıyla oluşturuldu.", NotificationType.Success);
+    } catch (error) {
+      console.log(error);
+      const err = error as { data?: { message?: string }, status?: number };
+      const errorMessage = err.data?.message || "Bilinmeyen hata";
+      addNotification(`Hatayı yetkili birime iletiniz: ${errorMessage}`, NotificationType.Error);
+    }
     // Burada form verilerini işleme veya API'ye gönderme işlemi yapılacak.
   };
 
@@ -72,9 +95,9 @@ const CreateCountForm : React.FC = () => {
                   queryHook={(arg: any, skip: boolean) => useQueryWrapper(useGetMarketsQuery, arg, skip)}
                   formatLabel={(item: Market) => item.name}
                   placeholder='Market Ara...'
-                  selectedSuggestion={selectedMarket}
-                  onSelect={setSelectedMarket}
-                  isError={!selectedMarket && isFormInvalid}
+                  selectedSuggestion={selectedStructure}
+                  onSelect={setSelectedStructure}
+                  isError={!selectedStructure && isFormInvalid}
                 />;
       case CountType.Vehicle:
         return <VehicleComponent />;
