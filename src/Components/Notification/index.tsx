@@ -48,7 +48,7 @@ const Notification: React.FC<NotificationProps> = ({ id, message, type, removeSe
   }, [removeSelf]);
   
   return (
-    <div id={`notification-${id}`} className={`flex items-center py-1 pl-1 pr-2 ${getBackgroundColorForType(type)} rounded-full text-text-lightest w-fit max-w-md`}>
+    <div id={`notification-${id}`} className={`flex items-center py-1 pl-1 pr-2 ${getBackgroundColorForType(type)} rounded-lg text-text-lightest w-fit max-w-md`}>
       <div className="flex-shrink-0"> 
         {getIconForType(type)}
       </div>      

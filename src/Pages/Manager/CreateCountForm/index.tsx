@@ -13,7 +13,7 @@ import CustomDatePicker from '../../../Components/CustomDatePicker';
 import { useAddCountFormMutation } from '../../../Redux/Services/countFormAPI';
 
 const CreateCountForm : React.FC = () => {
-  const [countName, setCountName] = useState('');
+  const [countName, setCountName] = useState<string>('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [countType, setCountType] = useState<CountType>(CountType.Market);
@@ -62,6 +62,12 @@ const CreateCountForm : React.FC = () => {
       }).unwrap();
 
       addNotification("Sayım başarıyla oluşturuldu.", NotificationType.Success);
+      // Form alanlarını başlangıç durumlarına sıfırla
+      setCountName('');
+      setStartDate(null);
+      setEndDate(null);
+      setCountType(CountType.Market); // Varsayılan sayım tipine dön
+      setSelectedStructure(null);
     } catch (error) {
       console.log(error);
       const err = error as { data?: { message?: string }, status?: number };
@@ -148,8 +154,8 @@ const CreateCountForm : React.FC = () => {
           {getComponentForCountType(countType)}
         </div>
         {/* Diğer form alanları ve düğmeler burada eklenebilir */}
-        <button type="submit" className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
-          Sayım Oluştur
+        <button type="submit" disabled={isLoading} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
+          {isLoading ? "Oluşturuluyor..." : "Sayım Oluştur"}
         </button>
       </form>
     </div>
