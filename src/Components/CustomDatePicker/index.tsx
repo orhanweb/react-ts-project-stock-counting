@@ -27,7 +27,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ label, selectedDate
           placeholderText= {placeholderText}
           dateFormat="dd/MM/yyyy HH:mm"
           calendarClassName='fit-content'
-          className={`${isError ? 'border-error' : ''} form-control w-full p-2 border-2 border-background bg-transparent rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300`}
+          className={`${isError ? 'border-error' : ''} form-control w-full p-2 border-2 border-opacity-30 dark:border-opacity-80 border-background bg-transparent rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300`}
         />
         {showResetIcon && (
           <MdCancel size={20} onClick={()=>onChange(null)} className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" />

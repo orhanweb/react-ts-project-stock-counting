@@ -112,7 +112,7 @@ const CreateCountForm : React.FC = () => {
 
   return (
     <div className="create-count-page w-full lg:w-3/4 mx-auto">
-      <h1 className="text-center text-2xl md:text-3xl lg:text-4xl mt-8 mb-4">Yeni Sayım Oluştur</h1>
+      <h1 className="text-2xl font-bold text-center mb-4 md:text-3xl lg:text-4xl mt-8">Yeni Sayım Oluştur</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Sayım adı input alanı */}

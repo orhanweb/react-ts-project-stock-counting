@@ -12,7 +12,7 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Navigate replace to="/manager/create-counts"  />
+        element: <Navigate replace to="/manager/view-counts"  />
       },
       {
         path: 'manager',children: [      // Routings for managers

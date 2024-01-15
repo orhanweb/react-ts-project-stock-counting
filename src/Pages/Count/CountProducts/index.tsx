@@ -9,6 +9,8 @@ import { MdSwapHoriz } from 'react-icons/md';
 import { FaQrcode } from "react-icons/fa6";
 import BarcodeScanner from '../../../Components/BarcodeScanner';
 import { useQueryWrapper } from '../../../Hooks/useQueryWrapper';
+import { useNotifications } from '../../../Hooks/useNotifications';
+import { NotificationType } from '../../../Components/Notification/index.d';
 
 // Ürün birim türlerini ayrıştıran fonksiyon
 const getUnitTypes = (product: Product) => {
@@ -34,6 +36,8 @@ const CountProducts: React.FC = () => {
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [ignoreReset, setIgnoreReset] = useState(false);
 
+  const { addNotification } = useNotifications(); // Bildirim ekleme fonksiyonu
+
   // Seçilen ürün değiştiğinde unitValues state'ini güncelle
   useEffect(() => {
     const initialUnitValues: Record<string, string> = {};
@@ -51,9 +55,10 @@ const CountProducts: React.FC = () => {
     // Eğer zorunlu statelerden herhangi biri boşsa, işlemi durdur
     if (!selectedMarket || !selectedCorridor || !selectedSectionLevel || !selectedProduct) {
       setIsFormInvalid(true); // Form geçersiz, hata state'ini güncelle
+      addNotification("Form da boş alan var.", NotificationType.Error);
       return; // Form gönderimini durdur
     }
-    setIsFormInvalid(false); // Form geçerli, hata state'ini sıfırla
+    setIsFormInvalid(false);
     // Eğer tüm zorunlu alanlar doldurulmuşsa, form verilerini işleme
     const formData = {
       marketId: selectedMarket.id,
@@ -64,6 +69,7 @@ const CountProducts: React.FC = () => {
     };
   
     console.log('Form Data:', formData);
+    addNotification("Ürün sayıma eklendi", NotificationType.Success);
     // Burada formData'yı API'ye gönderme işlemini yapcam
     setSelectedProduct(null);
   };
