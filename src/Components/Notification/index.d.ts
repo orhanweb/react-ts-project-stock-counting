@@ -3,7 +3,6 @@ export interface NotificationProps {
     id: number;
     message: string;
     type: NotificationType;
-    removeSelf: (id: number) => void;
 }
 
 // Bildirim tiplerini enum olarak tanımlama

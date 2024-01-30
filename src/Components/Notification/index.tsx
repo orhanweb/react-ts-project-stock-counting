@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NotificationProps, NotificationType } from "../../Components/Notification/index.d";
 import { MdError} from "react-icons/md";
 import { PiInfoFill } from "react-icons/pi";
 import { HiCheckCircle } from "react-icons/hi";
+import { motion } from 'framer-motion';
 
-const NOTIFICATION_TIMEOUT = 3000; // 3 saniyelik zaman aşımı süresi
 
 // İkon Fonksiyonu
 const getIconForType = (type: NotificationType) => {
@@ -37,23 +37,30 @@ const getBackgroundColorForType = (type: NotificationType) => {
       return 'bg-background';
   }
 };
-  
+
+const notificationVariants = {
+  initial: { opacity: 0, y: -50, scale: 0.3, zIndex: 1 },
+  animate: { opacity: 1, y: 0, scale: 1, zIndex: 1 },
+  exit: { opacity: 0, y: -50, scale: 0.5, zIndex: 0 }
+};
+
 // Notification Bileşeni
-const Notification: React.FC<NotificationProps> = ({ id, message, type, removeSelf }) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      removeSelf(id);
-    }, NOTIFICATION_TIMEOUT);
-    return () => clearTimeout(timer);
-  }, [removeSelf]);
-  
+const Notification: React.FC<NotificationProps> = ({ id, message, type }) => {
   return (
-    <div id={`notification-${id}`} className={`flex items-center py-1 pl-1 pr-2 ${getBackgroundColorForType(type)} rounded-lg text-text-lightest w-fit max-w-md`}>
-      <div className="flex-shrink-0"> 
+    <motion.div
+      layout  
+      id={`notification-${id}`}
+      className={`flex items-center py-1 pl-1 pr-2 ${getBackgroundColorForType(type)} rounded-lg text-text-lightest w-fit max-w-md`}
+      variants={notificationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="flex-shrink-0">
         {getIconForType(type)}
-      </div>      
+      </div>
       <span className="ml-1 break-words">{message}</span>
-    </div>
+    </motion.div>
   );
 };
 

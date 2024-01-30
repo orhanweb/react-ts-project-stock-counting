@@ -1,6 +1,9 @@
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import Notification from '../Components/Notification';
 import { NotificationProps, NotificationType } from '../Components/Notification/index.d';
+import { AnimatePresence } from 'framer-motion';
+
+const NOTIFICATION_TIMEOUT = 3000; // 3 saniyelik zaman aşımı süresi
 
 // Context için interface tanımı
 interface INotificationContext {
@@ -19,27 +22,31 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const removeNotification = (id: number) => {
     setNotifications(notifications => notifications.filter(notification => notification.id !== id));
   };
-
+  
   const addNotification = (message: string, type: NotificationType) => {
     const id = new Date().getTime();
-    setNotifications(prev => {
-      const newNotification = { id, message, type, removeSelf: removeNotification };
-      const newNotifications = [newNotification, ...prev];
-      // Listenin boyutu 3'ten büyükse, 3. elemandan sonraki tüm bildirimleri sil
-      if (newNotifications.length > 3) {
-        newNotifications.slice(3).forEach(notification => notification.removeSelf(notification.id));
-      }
-      return newNotifications;
-    });
+    const newNotification = { id, message, type };
+    setNotifications(prev => [newNotification, ...prev]);
+    setTimeout(() => removeNotification(id), NOTIFICATION_TIMEOUT);
   };
+
+  useEffect(() => {
+    if (notifications.length > 3) {
+      const oldestId = notifications[notifications.length - 1].id;
+      removeNotification(oldestId);
+    }
+  }, [notifications]);
+  
 
   return (
     <NotificationContext.Provider value={{ addNotification }}>
       {children}
-      <div className="z-50 absolute top-5 left-1/2 transform -translate-x-1/2 w-5/6 sm:w-auto sm:translate-x-0 sm:left-auto sm:right-5 space-y-2 flex flex-col sm:items-end items-center">
-        {notifications.map((notification) => (
-          <Notification key={notification.id} {...notification} />
-        ))}
+      <div className="z-[150] absolute top-5 left-1/2 transform -translate-x-1/2 w-5/6 sm:w-auto sm:translate-x-0 sm:left-auto sm:right-5 space-y-2 flex flex-col sm:items-end items-center">
+        <AnimatePresence>
+          {notifications.map((notification) => (
+            <Notification key={notification.id} {...notification} />
+          ))}
+        </AnimatePresence>
       </div>
     </NotificationContext.Provider>
   );

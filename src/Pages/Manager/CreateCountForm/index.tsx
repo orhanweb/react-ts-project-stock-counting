@@ -57,7 +57,7 @@ const CreateCountForm : React.FC = () => {
         countName,
         startDate,
         endDate,
-        countType, // Enum değeri, API'ye string olarak gidecek
+        countType,
         selectedStructureId: selectedStructure.id
       }).unwrap();
 
@@ -72,7 +72,7 @@ const CreateCountForm : React.FC = () => {
       console.log(error);
       const err = error as { data?: { message?: string }, status?: number };
       const errorMessage = err.data?.message || "Bilinmeyen hata";
-      addNotification(`Hatayı yetkili birime iletiniz: ${errorMessage}`, NotificationType.Error);
+      addNotification(`Hatayı yetkili birime iletiniz: ${errorMessage} ${err.status}`, NotificationType.Error);
     }
     // Burada form verilerini işleme veya API'ye gönderme işlemi yapılacak.
   };

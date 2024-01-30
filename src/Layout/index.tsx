@@ -11,7 +11,7 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden text-text-darkest dark:text-text-lightest bg-background-lightest dark:bg-background-dark">
+    <div className="flex h-screen text-text-darkest dark:text-text-lightest bg-background-lightest dark:bg-background-dark">
       {/* Overlay */}
       {isSidebarOpen && (
         <div
@@ -32,8 +32,8 @@ const Layout: React.FC = () => {
       <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Content */}
-      <div className="flex-1 flex flex-col bg-background-lightest dark:bg-background-dark transition-colors duration-300">
-        <main className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-auto bg-background-lightest dark:bg-background-dark transition-colors duration-300">
+        <main className="p-4">
           <Outlet />
         </main>
       </div>
