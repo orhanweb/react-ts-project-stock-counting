@@ -11,6 +11,8 @@ import Loader from '../../../Components/Loader';
 const ViewCounts: React.FC = () => {
   const { addNotification } = useNotifications(); 
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
+  const [counts, setCounts] = useState<CountFormData[]>([]); // Yeni state: counts
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -18,7 +20,14 @@ const ViewCounts: React.FC = () => {
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    setIsLoading(true)
+    const timer = setTimeout(() => {
+      setCounts(staticCounts); // 3 saniye sonra verileri state'e yerleştir
+      setIsLoading(false); // Yükleme tamamlandı, isLoading'i güncelle
+    }, 10000);
+
+    return () => {clearTimeout(timer); window.removeEventListener('resize', handleResize);}
+  
   }, []);
   
   const createDropdownOptions = (item : CountFormData) =>[
@@ -28,16 +37,25 @@ const ViewCounts: React.FC = () => {
   ];
   return (
     <div className="view-count-page w-full mx-auto">
-      <Loader isLoading={true}/>
       <h1 className="text-2xl font-bold text-center mb-4 md:text-3xl lg:text-4xl mt-8 cursor-default">Sayım Listesi</h1>
-      {isMobileView 
-        ? <GenericCardList initialSortBy='endDate' data={staticCounts} columns={viewCountsColumns} titleKey='countName' cardDropdownOptions={createDropdownOptions}/> 
-        : <GenericTable 
-          initialSortBy='endDate'
-          data={staticCounts}
-          columns={viewCountsColumns}
-          dropdownOptions={createDropdownOptions}
-          />
+      {isMobileView
+        ? <GenericCardList 
+            initialSortBy='endDate' 
+            data={counts} 
+            isLoading={isLoading} 
+            columns={viewCountsColumns} 
+            titleKey='countName' 
+            cardDropdownOptions={createDropdownOptions}/> 
+        : <>
+            <Loader isLoading={isLoading} message="Veriler yükleniyor..." />
+            <GenericTable 
+              initialSortBy='endDate'
+              data={counts}
+              isLoading={isLoading} 
+              columns={viewCountsColumns}
+              dropdownOptions={createDropdownOptions}
+            />
+          </> 
       }
     </div>
   );

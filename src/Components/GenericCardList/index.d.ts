@@ -8,4 +8,5 @@ export interface GenericCardListProps<T> {
     initialSortBy?: keyof T;
     actions?: ActionButtonProps[];
     cardDropdownOptions?: (item: T) => DropdownOption[];
+    isLoading?: boolean; 
 }

@@ -11,12 +11,12 @@ const Loader: React.FC<LoaderProps> = ({ isLoading, message }) => {
     if (!isLoading) return null;
 
     return (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-60 z-[200]">
-            <div className='flex flex-col gap-4'>
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-40 z-[200]">
+            <div className='flex flex-col justify-center items-center gap-4'>
             <RotatingLines 
                 visible={true}
                 width="96" 
-                strokeColor="#1dc46b" // Tailwind'in birincil rengini kullanarak
+                strokeColor="#1dc46b" // Tailwind primary renk
                 strokeWidth="3"
                 animationDuration="0.75"
                 ariaLabel="rotating-lines-loading"

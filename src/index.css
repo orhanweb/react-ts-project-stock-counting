@@ -3,25 +3,46 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Raleway';
-    src: url('/fonts/Raleway-ExtraLight.woff2') format('woff2'),
-         url('/fonts/Raleway-ExtraLight.woff') format('woff');
-    font-weight: 200;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'Raleway';
-    src: url('/fonts/Raleway-Regular.woff2') format('woff2'),
-         url('/fonts/Raleway-Regular.woff') format('woff');
-    font-weight: 400;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'Raleway';
-    src: url('/fonts/Raleway-Bold.woff2') format('woff2'),
-         url('/fonts/Raleway-Bold.woff') format('woff');
-    font-weight: 700;
-    font-style: normal;
-  }
+  font-family: 'Raleway';
+  src: url('/fonts/Raleway-ExtraLight.woff2') format('woff2'),
+        url('/fonts/Raleway-ExtraLight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/Raleway-Regular.woff2') format('woff2'),
+        url('/fonts/Raleway-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/Raleway-Bold.woff2') format('woff2'),
+        url('/fonts/Raleway-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Skeleton dark ligth theme compatibility */
+:root {
+  --skeleton-base-color: #d1d1d1;
+  --skeleton-highlight-color: #e5e4e4;
+}
+
+.dark {
+  --skeleton-base-color: #262626;
+  --skeleton-highlight-color: #454545;
+}
+
+/* Rotating lines spinner dark ligth theme compatibility */
+:root {
+  --spinner-color: #000000;
+}
+
+/* Dark Theme */
+.dark {
+  --spinner-color: #FFFFFF; 
+}

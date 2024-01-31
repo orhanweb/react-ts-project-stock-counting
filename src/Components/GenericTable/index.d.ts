@@ -11,5 +11,6 @@ export interface TableProps<T> {
     columns: TableColumn<T>[];
     initialSortBy?: keyof T;
     dropdownOptions?: (item: T) => DropdownOption[];
+    isLoading?: boolean;
 }
   
