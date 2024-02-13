@@ -1,10 +1,31 @@
 // src/Components/Dropdown/index.tsx
-import React, { useEffect, useRef} from 'react';
+import React, { useEffect, useRef, useState} from 'react';
 import {DropdownMenuProps} from './index.d'
 
 // Modüler Dropdown
 const DropdownMenu: React.FC<DropdownMenuProps> = ({id, options, closeDropdown }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  let newPositionStyle = 'left-0 top-full'; // Varsayılan pozisyon
+  const [positionStyle, setPositionStyle] = useState<string>(`opacity-0 ${newPositionStyle}`);
+
+  useEffect(() => {
+    if (dropdownRef.current) {
+      const dropdownRect = dropdownRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+  
+      // Varsayılan konum kontrolü ve alternatifler...
+      if (dropdownRect.right > windowWidth && dropdownRect.bottom <= windowHeight) { 
+        newPositionStyle = 'right-0 top-full';
+      } else if (dropdownRect.bottom > windowHeight && dropdownRect.right <= windowWidth) {
+        newPositionStyle = 'left-0 bottom-full';
+      } else if (dropdownRect.right > windowWidth && dropdownRect.bottom > windowHeight) {
+        newPositionStyle = 'right-0 bottom-full';
+      }
+      setPositionStyle(newPositionStyle);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -20,11 +41,11 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({id, options, closeDropdown }
   }, [closeDropdown]);
 
   return (
-    <div id={`dropdown-menu-${id}`} ref={dropdownRef} className="absolute flex flex-col items-center min-w-max z-50 bg-background-lightest dark:bg-background-darkest shadow-2xl rounded-lg p-2 space-y-2 left-1/2 transform -translate-x-1/2 top-full">
+    <div id={`dropdown-menu-${id}`} ref={dropdownRef} className={`absolute flex flex-col items-center min-w-max z-50 bg-background-lightest dark:bg-background-darkest shadow-2xl rounded-lg p-2 space-y-2 ${positionStyle}`}>
       {options.map((option, index) => (
         <button
           key={index}
-          className={`w-full text-sm px-4 py-2 rounded-lg ${option.dangerEffect ? 'bg-error bg-opacity-90 hover:bg-error text-text-lightest' : 'hover:bg-primary-lightest dark:hover:bg-primary-darker'}`}
+          className={`w-full text-sm px-4 py-2 text-start rounded-lg ${option.dangerEffect ? 'bg-error bg-opacity-90 hover:bg-error text-text-lightest' : 'hover:bg-primary-lightest dark:hover:bg-primary-darker'}`}
           onClick={() => {
             option.onClick();
             closeDropdown();
@@ -35,6 +56,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({id, options, closeDropdown }
       ))}
     </div>
   );
+  
 };
 
 export default DropdownMenu;

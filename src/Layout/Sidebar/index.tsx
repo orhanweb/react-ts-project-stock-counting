@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { SidebarLinkProps } from './index.d';
-import {SlNote } from 'react-icons/sl';
+import { LuClipboardEdit } from "react-icons/lu";
 import {BsViewList } from 'react-icons/bs';
-import {FaBarcode, FaCheckSquare } from 'react-icons/fa';
+import { MdAssignmentAdd,MdOutlineAssignment } from "react-icons/md";
 
-import ThemeToggle from '../../Components/ThemeToggle';
+import ThemeToggle from '../../Components/Buttons/ThemeToggle';
 import LogoComponent from '../../Components/LogoComponent';
+import LanguageToggle from '../../Components/Buttons/LanguageToggle';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `whitespace-nowrap flex items-center sm:justify-center lg:justify-normal px-4 py-2 rounded-lg transition ease-in-out duration-300
@@ -21,52 +22,53 @@ const SidebarLink: React.FC<SidebarLinkProps & { toggleSidebar: (isOpen: boolean
     <NavLink to={to} className={linkClass} onClick={() => toggleSidebar(false)} >
       <div className="flex items-center" title={label}>
       {React.cloneElement(icon, { size: '20px' })}
-      <span className="sm:hidden lg:inline ml-2">{label}</span> {/* 'lg:inline' sınıfı ekleyerek 'lg' breakpoint'ten itibaren etiketleri göster */}
+      <span className="sm:hidden lg:inline ml-2">{label}</span>
       </div>
     </NavLink>
   );
 
-// Yönetici (Manager) için sidebar linkleri
-const managerSidebarLinks: SidebarLinkProps[] = [
-  { to: '/manager/create-counts', label: 'Sayım Oluştur', icon: <SlNote /> },
-  { to: '/manager/view-counts', label: 'Sayımları Görüntüle', icon: <BsViewList /> },
-];
-
-// Sayım için sidebar linkleri
-const countSidebarLinks: SidebarLinkProps[] = [
-  { to: '/count/products', label: 'Ürün Say', icon: <FaBarcode /> },
-  { to: '/count/show-counted', label: 'Sayılanları Göster', icon: <FaCheckSquare /> },
-];
-
-const Sidebar: React.FC<{ isSidebarOpen: boolean, toggleSidebar: (isOpen: boolean) => void  }> = ({ isSidebarOpen,toggleSidebar  }) => {
+const Sidebar: React.FC<{ isSidebarOpen: boolean, toggleSidebar: (isOpen: boolean) => void  }> = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
 
-  const links = useMemo(() => {
-    if (location.pathname.startsWith('/count/')) {
-      return countSidebarLinks;
-    } else if (location.pathname.startsWith('/manager/')) {
-      return managerSidebarLinks;
-    }
-    return [];
-  }, [location.pathname]);
+  const sidebarLinks = useMemo(() => {
+    const pathSegments = location.pathname.split('/').filter(segment => segment.length > 0);
+    const baseLinks: SidebarLinkProps[] = [
+      { to: '/', label: 'Sayım Oluştur', icon: <LuClipboardEdit /> },
+      { to: '/view-counts', label: 'Sayımları Görüntüle', icon: <BsViewList /> },
+    ];
 
+    if (pathSegments[0] === 'count' && pathSegments[1]) {
+      const countID = pathSegments[1];
+      baseLinks.push(
+        { to: `/count/${countID}/addProduct`, label: 'Ürün Ekle', icon: <MdAssignmentAdd /> },
+        { to: `/count/${countID}/show-counted`, label: 'Sayılanları Göster', icon: <MdOutlineAssignment /> },
+      );
+    }
+
+    return baseLinks;
+  }, [location.pathname]);
+  
   return (
     <aside className={`fixed inset-y-0 left-0 w-64 sm:w-12 lg:w-64 h-full z-30 transition-width duration-500 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:block`} aria-label="Sidebar">
-      <div className="flex flex-col h-full py-2 px-3 sm:px-1 lg:px-3 bg-primary-light dark:bg-background-darker transition-colors duration-300 ease-in-out">
-        <LogoComponent toggleSidebar={toggleSidebar}/>
-        <div className="my-3 rounded-full mx-auto bg-background-darkest dark:bg-background-lightest dark:bg-opacity-70 transition-colors duration-300" style={{width: '98%', height:'3px'}} />
-        <div className="overflow-y-auto overflow-x-hidden">
-          <ul className="space-y-2">
-            {links.map((link) => (
-              <SidebarLink key={link.to} to={link.to} label={link.label} icon={link.icon} toggleSidebar={toggleSidebar} />
-            ))}
-          </ul>
+      <div className="flex flex-col items-start justify-between w-full h-full py-2 px-3 sm:px-1 lg:px-3 bg-primary-light dark:bg-background-darker transition-colors duration-300 ease-in-out">
+        <div className='w-full'>
+          <LogoComponent toggleSidebar={toggleSidebar}/>
+          <hr className="w-full mx-auto border rounded-full my-3 border-y-2 border-background-darkest dark:border-background-lightest transition-all duration-300" />
+          <div className="overflow-y-auto overflow-x-hidden">
+            <ul className="space-y-2">
+              {sidebarLinks.map((link) => (
+                <SidebarLink key={link.to} to={link.to} label={link.label} icon={link.icon} toggleSidebar={toggleSidebar} />
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="mt-auto">
+        <div className='w-full flex flex-col gap-2'>
+          <LanguageToggle/>
           <ThemeToggle toggleSidebar={toggleSidebar}/>
         </div>
       </div>
     </aside>
   );
 };
+
 export default Sidebar;

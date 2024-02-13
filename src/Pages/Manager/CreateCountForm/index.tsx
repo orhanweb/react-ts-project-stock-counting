@@ -11,6 +11,8 @@ import { useNotifications } from '../../../Hooks/useNotifications';
 import { NotificationType } from '../../../Components/Notification/index.d';
 import CustomDatePicker from '../../../Components/CustomDatePicker';
 import { useAddCountFormMutation } from '../../../Redux/Services/countFormAPI';
+import AsyncIconButton from '../../../Components/Buttons/AsyncIconButton';
+import { LuClipboardEdit } from "react-icons/lu";
 
 const CreateCountForm : React.FC = () => {
   const [countName, setCountName] = useState<string>('');
@@ -54,6 +56,7 @@ const CreateCountForm : React.FC = () => {
     setIsFormInvalid(false);
     try {
       await addCountForm({
+        id : String(new Date()),
         countName,
         startDate,
         endDate,
@@ -74,7 +77,6 @@ const CreateCountForm : React.FC = () => {
       const errorMessage = err.data?.message || "Bilinmeyen hata";
       addNotification(`Hatayı yetkili birime iletiniz: ${errorMessage} ${err.status}`, NotificationType.Error);
     }
-    // Burada form verilerini işleme veya API'ye gönderme işlemi yapılacak.
   };
 
   // Sayım tipine göre label içeriğini belirleme
@@ -111,9 +113,8 @@ const CreateCountForm : React.FC = () => {
   };
 
   return (
-    <div className="create-count-page w-full lg:w-3/4 mx-auto">
+    <div id='create-count-page' className="w-full lg:w-3/4 mx-auto">
       <h1 className="text-2xl font-bold text-center mb-4 md:text-3xl lg:text-4xl mt-8">Yeni Sayım Oluştur</h1>
-
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Sayım adı input alanı */}
         <div className="sayim-adi">
@@ -149,14 +150,11 @@ const CreateCountForm : React.FC = () => {
           <CountTypeSelector countType={countType} setCountType={setCountType} />
         </div>
 
-        <div className="sayim-tipi-secim-sonuc">
+        <div id='count-type-picker'>
           <label className="block text-sm mb-2">{`${getLabelForCountType(countType)}:`}</label>
           {getComponentForCountType(countType)}
         </div>
-        {/* Diğer form alanları ve düğmeler burada eklenebilir */}
-        <button type="submit" disabled={isLoading} className="mt-2 bg-primary-light dark:bg-primary-darkest text-text-darkest dark:text-text-lightest py-2 px-4 w-fit rounded-lg hover:bg-primary dark:hover:bg-primary transition-colors duration-300 ease-in-out">
-          {isLoading ? "Oluşturuluyor..." : "Sayım Oluştur"}
-        </button>
+        <AsyncIconButton type='submit' isLoading={isLoading} title='Sayım Oluştur' Icon={LuClipboardEdit}/>
       </form>
     </div>
   );

@@ -1,29 +1,36 @@
-// src/Router.tsx
-import { Navigate, RouteObject } from 'react-router-dom';
+import { RouteObject } from 'react-router-dom';
 import Layout from './Layout';
 import CreateCountForm from './Pages/Manager/CreateCountForm';
 import ViewCounts from './Pages/Manager/ViewCounts';
 import CountProducts from './Pages/Count/CountProducts';
 import ShowCounted from './Pages/Count/ShowCounted';
+import NotFoundPage from './Pages/NotFoundPage';
 
 const routes: RouteObject[] = [
   {
-    path: '/', element: <Layout />,
+    path: '/',
+    element: <Layout />,
     children: [
       {
         index: true,
-        element: <Navigate replace to="/manager/view-counts"  />
+        element: <CreateCountForm />
       },
       {
-        path: 'manager',children: [      // Routings for managers
-          { path: 'create-counts',element: <CreateCountForm />},
-          { path: 'view-counts',element: <ViewCounts />},
-        ]
+        path: 'view-counts',
+        element: <ViewCounts />
       },
       {
-        path: 'count',children: [// Routing for protuct counting
-          { path: 'products',element: <CountProducts />},
-          { path: 'show-counted',element: <ShowCounted />},]
+        path: 'count/:countID/addProduct',
+        element: <CountProducts />
+      },
+      {
+        path: 'count/:countID/show-counted',
+        element: <ShowCounted />
+      },
+      // 404 Sayfası için catch-all route
+      {
+        path: '*',
+        element: <NotFoundPage />
       },
     ],
   },

@@ -7,13 +7,15 @@ import GenericTable from '../../../Components/GenericTable';
 import { TableColumn } from '../../../Components/GenericTable/index.d';
 import GenericCardList from '../../../Components/GenericCardList';
 import Loader from '../../../Components/Loader';
+import { useNavigate } from 'react-router-dom';
 
 const ViewCounts: React.FC = () => {
+  const navigate = useNavigate();
   const { addNotification } = useNotifications(); 
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
-  const [counts, setCounts] = useState<CountFormData[]>([]); // Yeni state: counts
+  const [counts, setCounts] = useState<CountFormData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 640);
@@ -24,14 +26,15 @@ const ViewCounts: React.FC = () => {
     const timer = setTimeout(() => {
       setCounts(staticCounts); // 3 saniye sonra verileri state'e yerleştir
       setIsLoading(false); // Yükleme tamamlandı, isLoading'i güncelle
-    }, 10000);
+    }, 500);
 
     return () => {clearTimeout(timer); window.removeEventListener('resize', handleResize);}
   
   }, []);
-  
+
+  // Kullanıcıyı sayım sayfasına yönlendirdiğinde eğer sayımın süresi dolmuş veya kapalı ise kullanıcıyı not found sayfasına yönlendir   navigate('/not-found', { state: { message: 'Sayım kapalı.' } })
   const createDropdownOptions = (item : CountFormData) =>[
-    { label: 'Sayıma Git', onClick: () => addNotification(`Üzerinde çalışılıyor: ${item.countName}`, NotificationType.Warning)},
+    { label: 'Sayıma Git', onClick: () => navigate(`/count/${item.id}/addProduct`)},
     { label: 'Düzenle', onClick: () => addNotification(`Düzenleme işlemi henüz eklenmedi: ${item.countName}`, NotificationType.Warning)},
     { label: 'Sil', onClick: () => addNotification(`Silme işlemi henüz eklenmedi: ${item.countName}`, NotificationType.Warning), dangerEffect: true},
   ];
@@ -85,6 +88,7 @@ const viewCountsColumns : TableColumn<CountFormData> [] = [
 
 const staticCounts: CountFormData[] = [
   {
+    id: "1",
     countName: 'Market Sayımı 1',
     startDate: new Date(2024, 0, 5),
     endDate: new Date(2024, 3, 6),
@@ -92,6 +96,7 @@ const staticCounts: CountFormData[] = [
     selectedStructureId: 1
   },
   {
+    id: "2",
     countName: 'Depo Sayımı 1',
     startDate: new Date(2024, 0, 7),
     endDate: new Date(2024, 0, 8),
@@ -99,10 +104,420 @@ const staticCounts: CountFormData[] = [
     selectedStructureId: 2
   },
   {
+    id: "3",
     countName: 'Araç Sayımı 1',
     startDate: new Date(2024, 0, 10),
     endDate: new Date(2024, 0, 11),
     countType: 'Araç',
     selectedStructureId: 3
   },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  {
+    id: "1",
+    countName: 'Market Sayımı 1',
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 3, 6),
+    countType: 'Market',
+    selectedStructureId: 1
+  },
+  {
+    id: "2",
+    countName: 'Depo Sayımı 1',
+    startDate: new Date(2024, 0, 7),
+    endDate: new Date(2024, 0, 8),
+    countType: 'Depo',
+    selectedStructureId: 2
+  },
+  {
+    id: "3",
+    countName: 'Araç Sayımı 1',
+    startDate: new Date(2024, 0, 10),
+    endDate: new Date(2024, 0, 11),
+    countType: 'Araç',
+    selectedStructureId: 3
+  },
+  
 ];

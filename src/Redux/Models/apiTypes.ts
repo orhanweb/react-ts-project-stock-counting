@@ -84,6 +84,7 @@ export interface Product {
 }
 
 export interface CountFormData {
+    id: string;
     countName: string;
     startDate: Date;
     endDate: Date;

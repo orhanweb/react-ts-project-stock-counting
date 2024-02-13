@@ -5,19 +5,21 @@ const LogoComponent: React.FC<{toggleSidebar: (isOpen: boolean) => void}> = ({to
   let navigate = useNavigate();
 
   return (
-    <div
-      onClick={() => {
-        navigate('/');
-        toggleSidebar(false);
-      }}
-      className="w-full flex flex-col p-2 items-center cursor-pointer rounded-lg hover:bg-primary-lightest dark:hover:bg-primary-darkest transition-colors duration-300"
-      role="button"
-      aria-label="Ana Sayfaya Git"
-      title='Ana Sayfaya Git'
-    >
-      <LogoIcon className="fill-text-darkest dark:fill-primary transition-all duration-300 h-24 sm:h-12  lg:h-24" />
-      <span className="text-lg font-bold mt-2 text-text-darkest dark:text-primary transition-color duration-300 sm:hidden lg:block whitespace-nowrap">Stok Sayım</span>
-    </div>
+
+     <a
+     href="/"
+     onClick={(e) => {
+       e.preventDefault();
+       navigate('/');
+       toggleSidebar(false);
+     }}
+     className="w-full flex flex-col p-2 items-center cursor-pointer rounded-lg hover:bg-primary-lightest dark:hover:bg-primary-darkest transition-colors duration-300"
+     aria-label="Ana Sayfaya Git"
+     title="Ana Sayfaya Git"
+   >
+     <LogoIcon className="fill-text-darkest dark:fill-primary transition-all duration-300 h-24 sm:h-12  lg:h-24" />
+     <span className="text-lg font-bold mt-2 text-text-darkest dark:text-primary transition-color duration-300 sm:hidden lg:block whitespace-nowrap">Stok Sayım</span>
+   </a>
   );
 };
 

@@ -73,7 +73,7 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
                     ))}
                     {dropdownOptions && dropdownOptions.length > 0 && (
                       <TableCell>
-                        <div className="relative">
+                        <div className="relative inline-block">
                           <button 
                             className="hover:text-primary"
                             onClick={() => setActiveDropdown(activeDropdown === rowIndex ? null : rowIndex)}>

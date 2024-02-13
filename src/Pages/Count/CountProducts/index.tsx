@@ -1,7 +1,7 @@
 import React, { useState, FormEvent,useEffect } from 'react';
 import AutoComplete from '../../../Components/AutoComplete';
-import { useGetCorridorsQuery, useGetMarketsQuery, useGetSectionAndLevelQuery } from '../../../Redux/Services/countLocationAPI';
-import { Corridor, Market, Product, SectionAndLevel } from '../../../Redux/Models/apiTypes';
+import { useGetCorridorsQuery, useGetMarketQuery, useGetSectionAndLevelQuery } from '../../../Redux/Services/countLocationAPI';
+import { Corridor,  Product, SectionAndLevel } from '../../../Redux/Models/apiTypes';
 import { AutoCompleteProps } from '../../../Components/AutoComplete/index.d';
 import AutoCompleteV2 from '../../../Components/AutoCompleteV2';
 import { useGetProductNamesQuery,useGetBarcodesQuery } from '../../../Redux/Services/productsInfosAPI';
@@ -11,6 +11,9 @@ import BarcodeScanner from '../../../Components/BarcodeScanner';
 import { useQueryWrapper } from '../../../Hooks/useQueryWrapper';
 import { useNotifications } from '../../../Hooks/useNotifications';
 import { NotificationType } from '../../../Components/Notification/index.d';
+import AsyncIconButton from '../../../Components/Buttons/AsyncIconButton';
+import { IoIosAddCircle } from "react-icons/io";
+import { useParams } from 'react-router-dom';
 
 // Ürün birim türlerini ayrıştıran fonksiyon
 const getUnitTypes = (product: Product) => {
@@ -22,8 +25,14 @@ const getUnitTypes = (product: Product) => {
 };
 
 const CountProducts: React.FC = () => {
+  // Sayfa ilk açıldığında :coundID değerini al
+  // İstek at, gelen sonuca göre kullanıcıyı 404 e yönlendir yada sayfada tut 
+  // Seçili market ve yapı türü apiden gelecek, buradaki market seçimini kaldır
+  const { countID } = useParams<{ countID: string }>();
+  const { data: selectedMarket } = useGetMarketQuery({countID: countID ?? '1'}); 
+
   // Veri tabanına gönderilecek stateler
-  const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
+  //const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [selectedCorridor, setSelectedCorridor] = useState<Corridor | null>(null);
   const [selectedSectionLevel, setSelectedSectionLevel] = useState<SectionAndLevel | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -59,7 +68,7 @@ const CountProducts: React.FC = () => {
       return; // Form gönderimini durdur
     }
     setIsFormInvalid(false);
-    // Eğer tüm zorunlu alanlar doldurulmuşsa, form verilerini işleme
+    // Eğer tüm zorunlu alanlar doldurulmuşsa, form verilerini işle
     const formData = {
       marketId: selectedMarket.id,
       corridorId: selectedCorridor.id,
@@ -101,21 +110,12 @@ const CountProducts: React.FC = () => {
   // LOCATION AUTO COMPLETE COMPONENTS VARIABLES
   const autoCompleteFields: AutoCompleteProps[] = [
     {
-      queryHook: (arg: any, skip: boolean) => useQueryWrapper(useGetMarketsQuery, arg, skip),
-      formatLabel: (item: Market) => item.name,
-      placeholder: "Market Ara...",
-      selectedSuggestion: selectedMarket,
-      onSelect: setSelectedMarket,
-      isError: isFormInvalid && !selectedMarket
-    },
-    {
-      queryHook: (arg: any, skip: boolean) => useQueryWrapper(useGetCorridorsQuery, { marketId: arg }, skip || !selectedMarket),
+      queryHook: (arg: any, skip: boolean) => useQueryWrapper(useGetCorridorsQuery, { marketId: arg }, skip),
       formatLabel: (item: Corridor) => item.name,
       placeholder: "Koridor Ara...",
       selectedSuggestion: selectedCorridor,
       onSelect: setSelectedCorridor,
-      queryArg: selectedMarket?.id,
-      disabled: !selectedMarket,
+      queryArg: 1, // Şuanlık statik değer verdim daha sonra güncelle  selectedMarket?.id,
       isError: isFormInvalid && !selectedCorridor
     },
     {
@@ -131,11 +131,12 @@ const CountProducts: React.FC = () => {
   ];
 
   return (
-    <div className="count-products-page w-full lg:w-3/4 mx-auto"> {/* Genişlik ve padding ayarlamaları */}
+    <div id='count-products-page' className="w-full lg:w-3/4 mx-auto"> {/* Genişlik ve padding ayarlamaları */}
       <h1 className="text-center text-2xl md:text-3xl lg:text-4xl mt-8 mb-4">Ürün Sayım</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col items-center">
-        <h2 className="text-center text-xl md:text-2xl lg:text-3xl mt-2">Konum Seç</h2> 
-        <div className="konum-secimi flex flex-col lg:flex-row w-full items-center justify-center gap-4 py-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <h2 className="text-center text-xl md:text-2xl lg:text-3xl">Konum Seç</h2> 
+        <p>{selectedMarket?.name}</p> {/*Bu kısmı güncelle, yapı türü de yazdırılmalı*/}
+        <div id='picking-location' className=" flex flex-col lg:flex-row w-full items-center justify-center gap-4">
           {autoCompleteFields.map((field, index) => (
             <AutoComplete
               key={index}
@@ -150,11 +151,9 @@ const CountProducts: React.FC = () => {
             />
           ))}
         </div>
-        <h2 className="text-center text-xl md:text-2xl lg:text-3xl mt-2">Ürün Seç</h2> 
-        <div className="urun-secimi flex flex-row items-center justify-center gap-2 w-full py-4">
-          <button type="button" onClick={toggleInputType} className="p-2 text-xl bg-primary dark:bg-primary-darkest text-text-lightest rounded-lg hover:bg-primary-light hover:dark:bg-primary-darker transition-colors duration-300 ease-in-out">
-            <MdSwapHoriz />
-          </button>
+        <h2 className="text-center text-xl md:text-2xl lg:text-3xl">Ürün Seç</h2> 
+        <div id='picking-product' className="flex flex-row items-center justify-center gap-2 w-full">
+          <AsyncIconButton Icon={MdSwapHoriz} type='button' onClick={toggleInputType} className='min-w-fit px-2 py-2'/>
           {showBarcodeInput ? (
             <div className='flex items-center w-full gap-2'> 
               <AutoCompleteV2
@@ -186,8 +185,8 @@ const CountProducts: React.FC = () => {
             />
           )}
         </div>
-        <h2 className="text-center text-xl md:text-2xl lg:text-3xl mt-2">Stok Gir</h2>
-        <div className="stok-girme-secimi mt-2  py-4 w-full">
+        <h2 className="text-center text-xl md:text-2xl lg:text-3xl">Stok Gir</h2>
+        <div id='entering-stock' className="w-full">
           {selectedProduct ? (
             <div className="flex flex-col lg:flex-row w-full items-center justify-center gap-4">
               {Object.keys(unitValues).map((unitType) => (
@@ -213,9 +212,7 @@ const CountProducts: React.FC = () => {
             onBarcodeScanned={handleBarcodeScanned}
           />
         )}
-        <button type="submit" className="mt-4 px-4 py-2 bg-primary dark:bg-primary-darkest text-text-lightest rounded-lg hover:bg-primary-light hover:dark:bg-primary-darker transition-colors duration-300 ease-in-out">
-          Gönder
-        </button>
+        <AsyncIconButton type='submit' title='Sayıma Ekle' Icon={IoIosAddCircle}/>
       </form>
     </div>
   );
