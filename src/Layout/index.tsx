@@ -11,7 +11,7 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen text-text-darkest dark:text-text-lightest bg-background-lightest dark:bg-background-dark">
+    <div className="flex h-[100vh] text-text-darkest dark:text-text-lightest bg-background-lightest dark:bg-background-dark">
       {/* Overlay */}
       {isSidebarOpen && (
         <div
@@ -26,7 +26,6 @@ const Layout: React.FC = () => {
         onClick={()=> toggleSidebar(true)}>
         <FaBarsStaggered size="20px"/>
       </button>
-
 
       {/* Sidebar */}
       <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />

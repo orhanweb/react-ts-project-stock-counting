@@ -31,9 +31,8 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   };
 
   useEffect(() => {
-    if (notifications.length > 3) {
-      const oldestId = notifications[notifications.length - 1].id;
-      removeNotification(oldestId);
+    if (notifications.length > 5) {
+      setNotifications(notifications.slice(0, 5));
     }
   }, [notifications]);
   

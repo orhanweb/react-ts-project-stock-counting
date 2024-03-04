@@ -1,28 +1,23 @@
-export interface Market {
-    amount: string;
-    city_id: number;
-    code: string;
-    company_id: number;
-    country_id: number;
-    excode1: string;
-    excode2: string;
-    excode3: string;
-    fclass: number;
-    ftype: number;
-    groupcode: string;
-    id: number;
-    lock_items: string;
-    name: string;
-    note: string;
-    siteid: string;
-    state_id: number;
-    status: string;
-    timechanged: string;
-    timeentered: string;
-    title: string;
-    user_id: number;
+export interface StructureToCount {
+   id:number;
+   depo:string;
+}
+
+export interface CountVariant {
+    id:number;
+    title:string;
+}
+
+export interface CountType {
+    id:number;
+    title:string;
 }
   
+export interface CountArea {
+    id:number;
+    title:string;
+}
+
 export interface Corridor {
     id: number;
     depos_id: number;
@@ -84,10 +79,29 @@ export interface Product {
 }
 
 export interface CountFormData {
-    id: string;
-    countName: string;
-    startDate: Date;
-    endDate: Date;
-    countType: string;
-    selectedStructureId: number;
+    name: string;
+    title:string;
+    fclass: number; // sayım türü (variant)
+    ftype:number; // sayım tipi (type)
+    lock_items:number; // ilk kayıtta false
+    user_id:number; // statik olarak 0 ayarla session kısmını ekleyince düzelt
+    status: number; // başlanıçta true ayarla
+    timeChanged: string; // now
+    timeEntered: string; // now
+    depo_id: number;
+    site_id: number; // Sayım alanı id 
+    startDate: string; // date: formatı => 2024-02-15 17:19:06.000000
+    endDate: string;
 }  
+
+export interface CountList{
+    sayim_id: number;
+    sayim_adi:string; 
+    tur: string; // tür
+    tip: string; // tip
+    alan: string;
+    baslangic: string;
+    bitis: string;
+    depo_name: string;
+    durum: string;
+}

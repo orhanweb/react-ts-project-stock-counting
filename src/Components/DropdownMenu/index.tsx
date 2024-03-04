@@ -16,11 +16,11 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({id, options, closeDropdown }
       const windowHeight = window.innerHeight;
   
       // Varsayılan konum kontrolü ve alternatifler...
-      if (dropdownRect.right > windowWidth && dropdownRect.bottom <= windowHeight) { 
+      if (dropdownRect.right + 20 > windowWidth && dropdownRect.bottom <= windowHeight) { 
         newPositionStyle = 'right-0 top-full';
-      } else if (dropdownRect.bottom > windowHeight && dropdownRect.right <= windowWidth) {
+      } else if (dropdownRect.bottom > windowHeight && dropdownRect.right + 20 <= windowWidth) {
         newPositionStyle = 'left-0 bottom-full';
-      } else if (dropdownRect.right > windowWidth && dropdownRect.bottom > windowHeight) {
+      } else if (dropdownRect.right + 20 > windowWidth && dropdownRect.bottom > windowHeight) {
         newPositionStyle = 'right-0 bottom-full';
       }
       setPositionStyle(newPositionStyle);
@@ -41,7 +41,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({id, options, closeDropdown }
   }, [closeDropdown]);
 
   return (
-    <div id={`dropdown-menu-${id}`} ref={dropdownRef} className={`absolute flex flex-col items-center min-w-max z-50 bg-background-lightest dark:bg-background-darkest shadow-2xl rounded-lg p-2 space-y-2 ${positionStyle}`}>
+    <div id={`dropdown-menu-${id}`} ref={dropdownRef} className={`absolute flex flex-col items-center min-w-[150px] max-w-[400px] max-h-[50vh] overflow-auto z-50 bg-background-lightest dark:bg-background-darkest shadow-2xl rounded-lg p-2 space-y-2 ${positionStyle}`}>
       {options.map((option, index) => (
         <button
           key={index}

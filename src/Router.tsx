@@ -1,9 +1,9 @@
 import { RouteObject } from 'react-router-dom';
 import Layout from './Layout';
-import CreateCountForm from './Pages/Manager/CreateCountForm';
-import ViewCounts from './Pages/Manager/ViewCounts';
-import CountProducts from './Pages/Count/CountProducts';
-import ShowCounted from './Pages/Count/ShowCounted';
+import CreateCount from './Pages/CreateCount';
+import ViewCounts from './Pages/ViewCounts';
+import AddProduct from './Pages/Count/AddProduct';
+import ViewCounted from './Pages/Count/ViewCounted';
 import NotFoundPage from './Pages/NotFoundPage';
 
 const routes: RouteObject[] = [
@@ -13,7 +13,7 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <CreateCountForm />
+        element: <CreateCount />
       },
       {
         path: 'view-counts',
@@ -21,13 +21,13 @@ const routes: RouteObject[] = [
       },
       {
         path: 'count/:countID/addProduct',
-        element: <CountProducts />
+        element: <AddProduct />
       },
       {
-        path: 'count/:countID/show-counted',
-        element: <ShowCounted />
+        path: 'count/:countID/view-counted',
+        element: <ViewCounted />
       },
-      // 404 Sayfası için catch-all route
+      // catch-all route for 404 page
       {
         path: '*',
         element: <NotFoundPage />

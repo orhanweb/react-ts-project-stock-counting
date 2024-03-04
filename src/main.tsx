@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { store } from './Redux/store';
 import App from './App';
 import './index.css';
+import './i18n';
 import { NotificationProvider } from './Contexts/notificationContext';
 
 const currentTheme = localStorage.getItem('theme') || 'light';

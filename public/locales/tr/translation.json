@@ -1,0 +1,31 @@
+{
+    "common":{
+        "form-is-empty":"Formda boş alan var"
+    },
+    "add-product":{
+        "page-title":"Ürün Sayım",
+        "sub-title-1": "Konum Seç",
+        "sub-title-2": "Ürün Seç",
+        "sub-title-3": "Stok Gir",
+        "added-product":"Ürün sayıma eklendi",
+        "search-area": "Alan ara...",
+        "dynamic-region-and-floor-autocomplate": "Bölge: {{region}} - Kat: {{floor}}",
+        "search-region-and-floor": "Bölge ve seviye ara...",
+        "dynamic-barcode-autocomplate": "Ürün Adı: {{product}}\nÜrün Barkodu: {{barcode}}",
+        "search-barcode":"Ürün barkodu ara...",
+        "dynamic-product-autocomplate": "Ürün Adı: {{product}}\nÜrün Kodu: {{code}}",
+        "search-product":"Ürün adı veya kod ara...",
+        "dynamic-unit":"{{unitType}} Miktarı",
+        "warning-unit":"Stok Girmek İçin Ürün Seçin",
+        "add-count": "Sayıma Ekle"
+    },
+    "view-counted":{},
+    "create-count":{
+        "invalid-date-warning-1":"Sayım tarihleri geçmiş bir tarihi içeremez",
+        "invalid-date-warning-2":"Bitiş tarihi, başlangıç tarihinden önce olamaz",
+        "succesfully-created":"Sayım başarıyla oluşturuldu",
+        "unknown-error": "Bilinmeyen hata",
+        "error-message": "Hatayı yetkili birime iletiniz: {{errorMessage}} {{status}}"
+    }
+
+}
