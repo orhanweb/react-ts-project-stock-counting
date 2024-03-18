@@ -32,7 +32,6 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
     if (dataSuggestions) {
       setSuggestions(dataSuggestions);
     }
-    setTriggerLoad(false)
   }, [dataSuggestions]);
   
   // Bileşenin dışına tıklandığına kapanması için. useRef ve useEffect birlikte kullanıldı.
@@ -69,20 +68,17 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   }, 300), [dataSuggestions,formatLabel]);  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!disabled) {
-      const value = e.target.value;
-      setInputValue(value);
-      onSelect(null)
-      filterSuggestions(value);
-    }
+    const value = e.target.value;
+    setInputValue(value);
+    onSelect(null)
+    filterSuggestions(value);
   };
 
   const handleSuggestionClick = (suggestion: any) => {
-    if (!disabled) {
-      setInputValue(formatLabel(suggestion));
-      onSelect(suggestion);
-      setShowSuggestions(false);
-    }
+    setInputValue(formatLabel(suggestion));
+    onSelect(suggestion);
+    setShowSuggestions(false);
+    setTriggerLoad(false)
   };
 
   const handleFocus = () => {

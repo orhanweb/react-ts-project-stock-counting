@@ -76,7 +76,10 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
                         <div className="relative inline-block">
                           <button 
                             className="hover:text-primary"
-                            onClick={() => setActiveDropdown(activeDropdown === rowIndex ? null : rowIndex)}>
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setActiveDropdown(activeDropdown === rowIndex ? null : rowIndex)
+                            }}>
                             {activeDropdown === rowIndex ? <IoClose size={20} className="text-error"/> : <IoIosMore size={20}/>}
                           </button>
                           {activeDropdown === rowIndex && 

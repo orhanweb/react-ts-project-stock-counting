@@ -103,5 +103,5 @@ export interface CountList{
     baslangic: string;
     bitis: string;
     depo_name: string;
-    durum: string;
+    durum: string; // 0, 1 veya 2 olabilir
 }

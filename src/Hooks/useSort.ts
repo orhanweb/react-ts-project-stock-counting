@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 
 // Sıralama yönlerini tanımlayan enum
 export enum SortDirection {
-  ASCENDING = 'ascending',
-  DESCENDING = 'descending',
+  ASCENDING = "ascending",
+  DESCENDING = "descending",
 }
 
 // SortConfig için güncellenmiş interface
@@ -13,8 +13,12 @@ export interface SortConfig<T> {
 }
 
 // Generic useSort hook'u
-const useSort = <T extends {}>(items: T[], initialSortConfig: SortConfig<T>) => {
-  const [sortConfig, setSortConfig] = useState<SortConfig<T>>(initialSortConfig);
+const useSort = <T extends {}>(
+  items: T[],
+  initialSortConfig: SortConfig<T>
+) => {
+  const [sortConfig, setSortConfig] =
+    useState<SortConfig<T>>(initialSortConfig);
 
   // Sıralama isteği fonksiyonu
   const requestSort = (sortBy: keyof T) => {

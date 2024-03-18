@@ -155,8 +155,8 @@ const GenericCardList = <T extends {}>({ data, columns, titleKey, actions, cardD
                                         {columns.map((column, colIndex) => (
                                             column.key !== titleKey && (
                                                 <span key={colIndex} className="block">
-                                                    <strong className="font-bold">{column.header}:</strong>&nbsp;
-                                                    {column.render ? column.render(item) : renderContent(item[column.key as keyof T])}
+                                                    <span className="">{column.header}:</span>&nbsp;
+                                                    {column.render ? column.render(item) :<strong>{renderContent(item[column.key as keyof T])}</strong>}
                                                 </span>
                                             )
                                         ))}
@@ -165,7 +165,10 @@ const GenericCardList = <T extends {}>({ data, columns, titleKey, actions, cardD
 
                                                 <button
                                                     className={ ` px-4 py-2 rounded-lg cursor-default text-sm whitespace-nowrap transition ease-in-out duration-300 bg-primary hover:bg-primary-lighter dark:hover:bg-primary-darker text-text-darkest dark:text-text-lightest`}
-                                                    onClick={() => setActiveDropdownIndex(activeDropdownIndex === index ? null : index)}
+                                                    onClick={(event) => {
+                                                        event.stopPropagation()
+                                                        setActiveDropdownIndex(activeDropdownIndex === index ? null : index)
+                                                    }}
                                                 >
                                                     İşlemler
                                                 </button>

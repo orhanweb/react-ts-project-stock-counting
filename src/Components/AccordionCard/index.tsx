@@ -9,10 +9,10 @@ import { HiChevronDown } from "react-icons/hi2";
 
 const AccordionCard: React.FC<AccordionCardProps> = ({ title, isOpen, onClick, children }) => {
     return (
-        <div id='accordion-card' className='py-2 px-4 rounded-xl flex flex-col card centered-shadow cursor-default bg-background-lightest dark:bg-background-darkest text-text-darkest dark:text-text-lightest break-words'>
+        <div id='accordion-card' className={`${isOpen? 'border border-primary': ''}  py-2 px-4 rounded-xl flex flex-col card centered-shadow cursor-default bg-background-lightest dark:bg-background-darkest text-text-darkest dark:text-text-lightest break-words transition-all duration-300`}>
             <div className="flex justify-between items-center text-lg font-bold my-2" onClick={onClick}>
                 {title}
-                <motion.span className={'rounded-full p-2 dark:hover:bg-background hover:bg-background-light transition-colors duration-300'} animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                <motion.span className={'rounded-full p-2 dark:hover:bg-background hover:bg-background-light'} animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
                     <HiChevronDown  />
                 </motion.span>
             </div>

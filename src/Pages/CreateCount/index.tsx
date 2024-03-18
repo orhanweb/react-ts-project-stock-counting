@@ -13,7 +13,7 @@ import AsyncIconButton from '../../Components/Buttons/AsyncIconButton';
 import { LuClipboardEdit } from "react-icons/lu";
 import { useTranslation } from 'react-i18next';
 import Skeleton from 'react-loading-skeleton';
-import { toCustomFormat } from '../../Utils/formatTime';
+import { formatDateV1 } from '../../Utils/formatDateFuncs';
 
 
 const CreateCount : React.FC = () => {
@@ -102,13 +102,13 @@ const CreateCount : React.FC = () => {
         ftype: countType,
         lock_items: 0, //Initially set to false
         user_id: 0, // Statically set to 0
-        status: 1, // Initially set to true
-        timeChanged: toCustomFormat(new Date()),
-        timeEntered: toCustomFormat(new Date()),
+        status: 0, // Initially set to false
+        timeChanged: formatDateV1(new Date()),
+        timeEntered: formatDateV1(new Date()),
         depo_id: selectedStructure?.id,
         site_id: countArea,
-        startDate: toCustomFormat(startDate),
-        endDate: toCustomFormat(endDate),
+        startDate: formatDateV1(startDate),
+        endDate: formatDateV1(endDate),
       }).unwrap();
 
       addNotification(t("create-count.succesfully-created"), NotificationType.Success);
@@ -121,7 +121,6 @@ const CreateCount : React.FC = () => {
       setCountArea(null);
       setSelectedStructure(null);
     } catch (error) {
-      console.log(error);
       const err = error as { data?: { message?: string }, status?: number };
       const errorMessage = err.data?.message || t("create-count.unknown-error");
       addNotification(t("create-count.error-message",{errorMessage, status:err.status}), NotificationType.Error);

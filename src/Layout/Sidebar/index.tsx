@@ -49,7 +49,7 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean, toggleSidebar: (isOpen: boolea
   }, [location.pathname]);
   
   return (
-    <aside className={`fixed inset-y-0 left-0 w-64 sm:w-12 lg:w-64 z-30 transition-width duration-500 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:block`} aria-label="Sidebar">
+    <aside className={`fixed inset-y-0 left-0 w-64 sm:w-12 lg:w-64 z-[100] transition-width duration-500 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:block`} aria-label="Sidebar">
       <div className="flex flex-col items-start justify-between w-full h-full py-2 px-3 sm:px-1 lg:px-3 bg-primary-light dark:bg-background-darker transition-colors duration-300 ease-in-out">
         {/* Logo and Header Part */}
         <div className='w-full'>

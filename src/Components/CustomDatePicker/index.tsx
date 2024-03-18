@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker, { registerLocale } from 'react-datepicker'; // Locale kaydetmek için gerekli
+import DatePicker, { ReactDatePickerProps, registerLocale } from 'react-datepicker'; // Locale kaydetmek için gerekli
 import { MdCancel } from "react-icons/md";
 import "react-datepicker/dist/react-datepicker.css";
 import './index.css';
@@ -8,22 +8,21 @@ import tr from 'date-fns/locale/tr'; // Türkçe dil desteği için gerekli mod�
 registerLocale('tr', tr); // Türkçe'yi kaydet
 
 
-interface CustomDatePickerProps {
+interface CustomDatePickerProps extends ReactDatePickerProps{
   label?: string;
-  selectedDate: Date | null;
-  onChange: (date: Date | null) => void;
+  selectedDate?: Date | null;
+  onChange: (date?: Date | null) => void;
   isError?: boolean;
-  placeholderText?: string;
 }
 
-const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ label, selectedDate, onChange, isError=false, placeholderText=''}) => {
+const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ label, selectedDate, onChange, isError=false, ...props}) => {
   const [minTime, setMinTime] = useState<Date>(new Date());
 
   useEffect(() => {
     setMinTime(getMinTime(selectedDate));
   }, [selectedDate]);
 
-  const getMinTime = (date: Date | null): Date => {
+  const getMinTime = (date?: Date | null): Date => {
     const now = new Date();
     return date && date.toDateString() === now.toDateString() ? now : new Date(now.setHours(0, 0, 0, 0));
   };
@@ -32,14 +31,14 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ label, selectedDate
     <div className="form-item">
       {label && <label className="block text-sm mb-2">{label}</label>}
       <div className="relative">
-        <DatePicker 
+        <DatePicker
+          {...props}
           wrapperClassName="w-full"
           selected={selectedDate}
           onChange={onChange}
           minDate={new Date()}
           showTimeSelect
           timeFormat="HH:mm"
-          placeholderText={placeholderText}
           dateFormat="dd/MM/yyyy HH:mm"
           calendarClassName="fit-content"
           timeCaption='Saat'

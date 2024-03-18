@@ -4,10 +4,10 @@ import { RotatingLines } from 'react-loader-spinner';
 
 interface LoaderProps {
     isLoading: boolean;
-    message?: string;
+    messages?: string[];
 }
 
-const Loader: React.FC<LoaderProps> = ({ isLoading, message }) => {
+const Loader: React.FC<LoaderProps> = ({ isLoading, messages }) => {
     if (!isLoading) return null;
 
     return (
@@ -21,7 +21,13 @@ const Loader: React.FC<LoaderProps> = ({ isLoading, message }) => {
                 animationDuration="0.75"
                 ariaLabel="rotating-lines-loading"
             />
-                <p className="text-text-lightest text-lg">{message || 'Yükleniyor...'}</p>
+                {messages && messages.length > 0 ? (
+                  messages.map((message, index) => (
+                    <p key={index} className="text-text-lightest text-lg">{message}</p>
+                  ))
+                ) : (
+                  <p className="text-text-lightest text-lg">Yükleniyor...</p>
+                )}
             </div>
         </div>
     );
