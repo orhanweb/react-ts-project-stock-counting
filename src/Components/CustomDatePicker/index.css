@@ -1,3 +1,6 @@
 .fit-content {
   width: max-content;
 }
+.react-datepicker__close-icon::after {
+  @apply flex justify-center items-center text-black h-5 w-5 bg-white text-2xl;
+}

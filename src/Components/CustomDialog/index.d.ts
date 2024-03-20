@@ -7,7 +7,6 @@ export interface DialogProps {
   onConfirm?: () => void;
   onCancel?: () => void;
   dialogType?: DialogType;
-  isSmallDialog?: boolean;
   cancelButtonLabel?: string;
   confirmButtonLabel?: string;
   isDeactivateCloseAfterConfirm?: boolean;

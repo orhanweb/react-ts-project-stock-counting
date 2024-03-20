@@ -113,7 +113,7 @@ const ViewCounts: React.FC = () => {
             Icon: FaPlay,
             label: "Sayımı Başlat",
             onClick: () =>
-              startCount({ countId: item.sayim_id })
+              startCount({ countId: item.sayim_id, status: "1" })
                 .unwrap()
                 .then(() =>
                   addNotification(
@@ -141,7 +141,7 @@ const ViewCounts: React.FC = () => {
             Icon: TbPlayerStopFilled,
             label: "Sayımı Bitir",
             onClick: () =>
-              endCount({ countId: item.sayim_id })
+              endCount({ countId: item.sayim_id, status: "2" })
                 .unwrap()
                 .then(() =>
                   addNotification(
@@ -228,13 +228,13 @@ const viewCountsColumns: TableColumn<CountList>[] = [
     header: "Başlangıç Tarihi",
     key: "baslangic",
     sortable: true,
-    render: (item) => <strong>{formatDateV2(item.baslangic)}</strong>,
+    render: (item) => formatDateV2(item.baslangic),
   },
   {
     header: "Bitiş Tarihi",
     key: "bitis",
     sortable: true,
-    render: (item) => <strong>{formatDateV2(item.bitis)}</strong>,
+    render: (item) => formatDateV2(item.bitis),
   },
   { header: "Sayım Türü", key: "tur", sortable: true },
   { header: "Sayım Tipi", key: "tip", sortable: true },
@@ -247,13 +247,13 @@ const viewCountsColumns: TableColumn<CountList>[] = [
     render: (item) => {
       switch (item.durum) {
         case "0":
-          return <strong>Sayım Başlamadı</strong>;
+          return "Sayım Başlamadı";
         case "1":
-          return <strong>Sayım Devam Ediyor</strong>;
+          return "Sayım Devam Ediyor";
         case "2":
-          return <strong>Sayım Bitti</strong>;
+          return "Sayım Bitti";
         default:
-          return <strong>Bilgi yok</strong>;
+          return "Bilgi yok";
       }
     },
   },

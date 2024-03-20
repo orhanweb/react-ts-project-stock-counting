@@ -1,217 +1,327 @@
-import { GenericCardListProps } from './index.d';
-import { renderContent } from '../../Utils/renderContent';
-import { useEffect, useMemo, useState } from 'react';
-import AccordionCard from '../AccordionCard';
-import ActionBar from '../ActionBar';
-import DropdownMenu from '../DropdownMenu';
-import { ActionButtonProps } from '../ActionBar/index.d';
-import Dialog from '../CustomDialog';
-import { getInitialSortConfig } from '../../Utils/getInitialSortConfig';
-import useSort, { SortConfig, SortDirection } from '../../Hooks/useSort';
-import { FaCircleArrowDown,FaCircleArrowUp } from "react-icons/fa6";
-import { motion } from 'framer-motion';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import { GenericCardListProps } from "./index.d";
+import { renderContent } from "../../Utils/renderContent";
+import { useEffect, useMemo, useState } from "react";
+import AccordionCard from "../AccordionCard";
+import ActionBar from "../ActionBar";
+import DropdownMenu from "../DropdownMenu";
+import { ActionButtonProps } from "../ActionBar/index.d";
+import Dialog from "../CustomDialog";
+import { getInitialSortConfig } from "../../Utils/getInitialSortConfig";
+import useSort, { SortConfig, SortDirection } from "../../Hooks/useSort";
+import { FaCircleArrowDown, FaCircleArrowUp } from "react-icons/fa6";
+import { motion } from "framer-motion";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-const GenericCardList = <T extends {}>({ data, columns, titleKey, actions, cardDropdownOptions, initialSortBy, isLoading = false }: GenericCardListProps<T>) => {
-    const [openCardIndex, setOpenCardIndex] = useState<number | null>(null);
-    const [isAllCardOpen, setIsAllCardOpen] = useState<boolean>(false);
-    const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
-    const [isSortDialogOpen, setIsSortDialogOpen] = useState<boolean>(false);
-    const [tempSortConfig, setTempSortConfig] = useState<SortConfig<T> | null>(null);
+const GenericCardList = <T extends {}>({
+  data,
+  columns,
+  titleKey,
+  actions,
+  cardDropdownOptions,
+  initialSortBy,
+  isLoading = false,
+}: GenericCardListProps<T>) => {
+  const [openCardIndex, setOpenCardIndex] = useState<number | null>(null);
+  const [isAllCardOpen, setIsAllCardOpen] = useState<boolean>(false);
+  const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(
+    null
+  );
+  const [isSortDialogOpen, setIsSortDialogOpen] = useState<boolean>(false);
+  const [tempSortConfig, setTempSortConfig] = useState<SortConfig<T> | null>(
+    null
+  );
 
-    const toggleCard = (index: number) => {
-        setOpenCardIndex(prevIndex => prevIndex === index ? null : index);
-        setIsAllCardOpen(false)
-    };
-    
-    const toggleAllCardButtonText = isAllCardOpen? 'Tekli Aç' :'Tümünü Aç';
-    const toggleAllCardButtonFunc = () => {
-        setIsAllCardOpen(!isAllCardOpen)
-        setOpenCardIndex(null);
-    } 
+  const toggleCard = (index: number) => {
+    setOpenCardIndex((prevIndex) => (prevIndex === index ? null : index));
+    setIsAllCardOpen(false);
+  };
 
-    // Check sortable columns we need at least one to show sort button in action bar
-    const isSortableColumnPresent = useMemo(() => columns.some(column => column.sortable), [columns]);
-    // Sıralanabilir sütunların listesi
-    const sortableColumns = useMemo(() => columns.filter(column => column.sortable), [columns]);
+  const toggleAllCardButtonText = isAllCardOpen ? "Tekli Aç" : "Tümünü Aç";
+  const toggleAllCardButtonFunc = () => {
+    setIsAllCardOpen(!isAllCardOpen);
+    setOpenCardIndex(null);
+  };
 
-    // Sıralanacak sütun için seçme mantığı
-    const handleSortSelection = (columnKey: keyof T) => {
-        setTempSortConfig(prevConfig => {
-            if (sortConfig.sortBy === columnKey && !prevConfig){// Eğer zaten sıralanan sütun seçilirse  
-                return {sortBy: columnKey,direction: sortConfig.direction === SortDirection.ASCENDING ? SortDirection.DESCENDING : SortDirection.ASCENDING,};
+  // Check sortable columns we need at least one to show sort button in action bar
+  const isSortableColumnPresent = useMemo(
+    () => columns.some((column) => column.sortable),
+    [columns]
+  );
+  // Sıralanabilir sütunların listesi
+  const sortableColumns = useMemo(
+    () => columns.filter((column) => column.sortable),
+    [columns]
+  );
+
+  // Sıralanacak sütun için seçme mantığı
+  const handleSortSelection = (columnKey: keyof T) => {
+    setTempSortConfig((prevConfig) => {
+      if (sortConfig.sortBy === columnKey && !prevConfig) {
+        // Eğer zaten sıralanan sütun seçilirse
+        return {
+          sortBy: columnKey,
+          direction:
+            sortConfig.direction === SortDirection.ASCENDING
+              ? SortDirection.DESCENDING
+              : SortDirection.ASCENDING,
+        };
+      } else {
+        // Eğer aynı sütun seçilirse, yönü değiştir
+        return prevConfig && prevConfig.sortBy === columnKey
+          ? {
+              sortBy: columnKey,
+              direction:
+                prevConfig.direction === SortDirection.ASCENDING
+                  ? SortDirection.DESCENDING
+                  : SortDirection.ASCENDING,
             }
-            else{// Eğer aynı sütun seçilirse, yönü değiştir 
-                return prevConfig && prevConfig.sortBy === columnKey
-                ?   { sortBy: columnKey,direction: prevConfig.direction === SortDirection.ASCENDING ? SortDirection.DESCENDING : SortDirection.ASCENDING,}
-                :   { sortBy: columnKey, direction: SortDirection.ASCENDING }               
-            } 
-        });
-    };
+          : { sortBy: columnKey, direction: SortDirection.ASCENDING };
+      }
+    });
+  };
 
-    // Dialog açılıp kapandığında geçici sıralama state'ini null'a çek
-    useEffect((()=>setTempSortConfig(null)),[isSortDialogOpen])
+  // Dialog açılıp kapandığında geçici sıralama state'ini null'a çek
+  useEffect(() => setTempSortConfig(null), [isSortDialogOpen]);
 
-    // Sıralanan sütun için buton renklendirmesi
-    const getButtonStyle = (columnKey: keyof T) => {
-        const activeConfig = tempSortConfig || sortConfig;
-        const isActive = activeConfig && activeConfig.sortBy === columnKey;
-        return isActive ? 'border-primary text-primary' : 'border-background';
-    };
-    
-    // Sıralanan sütun için artan azalan ikonları döndüren fonksiyon
-    const getSortIcon = (columnKey: keyof T) => {
-        const activeConfig = tempSortConfig || sortConfig;
-        if (activeConfig && activeConfig.sortBy === columnKey) {
-            return activeConfig.direction === SortDirection.ASCENDING ? <FaCircleArrowDown /> : <FaCircleArrowUp />;
-        }
-        return null;
-    };
-    
-    // Sütunlarda key alıp header döndüren fonksiyon
-    const getColumnHeaderByKey = (key: keyof T) => {
-        const column = columns.find(c => c.key === key);
-        return column ? column.header : '';
-    };
-    
-    // Sıralamada açıklama metni veren fonksiyon
-    const getSortingStatusText = () => {
-        if (!sortConfig && !tempSortConfig) return null;
-      
-        return tempSortConfig
-          ? tempSortConfig.sortBy === sortConfig?.sortBy
-            ? tempSortConfig.direction !== sortConfig?.direction 
-              ? "Sıralanan sütun aynı, sadece yönü değişecektir." 
-              : "Sıralama değişmeyecektir."
-            : `Sıralama, ${getColumnHeaderByKey(tempSortConfig.sortBy)} sütununa göre yapılacaktır.`
-          : `Şuanda sıralama ${getColumnHeaderByKey(sortConfig.sortBy)} sütununa göre yapılmaktadır.`;
-      };
-      
-      
-    // ActionBar butons
-    const actionBarButtons : ActionButtonProps[] = [
-        {
-            text: toggleAllCardButtonText,
-            onClick: toggleAllCardButtonFunc,
-        },
-        ...(isSortableColumnPresent ? [{ text: "Sırala",onClick: ()=> setIsSortDialogOpen(true) }] : []),
-        ...(actions ?? [])
-    ];
+  // Sıralanan sütun için buton renklendirmesi
+  const getButtonStyle = (columnKey: keyof T) => {
+    const activeConfig = tempSortConfig || sortConfig;
+    const isActive = activeConfig && activeConfig.sortBy === columnKey;
+    return isActive ? "border-primary text-primary" : "border-background";
+  };
 
-    // useSort hook'unu başlangıç sıralama yapılandırması
-    const initialSortConfig = useMemo(() => getInitialSortConfig(columns,initialSortBy), [initialSortBy, columns]);
-    const { sortedItems, sortConfig, requestSort } = useSort<T>(data, initialSortConfig);
+  // Sıralanan sütun için artan azalan ikonları döndüren fonksiyon
+  const getSortIcon = (columnKey: keyof T) => {
+    const activeConfig = tempSortConfig || sortConfig;
+    if (activeConfig && activeConfig.sortBy === columnKey) {
+      return activeConfig.direction === SortDirection.ASCENDING ? (
+        <FaCircleArrowDown />
+      ) : (
+        <FaCircleArrowUp />
+      );
+    }
+    return null;
+  };
 
-    // useMemo kullanarak başlık sütunu ve render fonksiyonunu hesaplama
-    const renderTitle = useMemo(() => {
-        const column = columns.find(c => c.key === titleKey);
-        if (column && column.render) {
-            return (item: T) => column.render!(item);
-        } else {
-            return (item: T) => renderContent(item[titleKey as keyof T]);
-        }
-    }, [columns, titleKey]);
+  // Sütunlarda key alıp header döndüren fonksiyon
+  const getColumnHeaderByKey = (key: keyof T) => {
+    const column = columns.find((c) => c.key === key);
+    return column ? column.header : "";
+  };
 
-    const listVariants = {
-        visible: {transition: {staggerChildren: 0.05, delayChildren: 0.2}},
-        hidden: { }
-    };
+  // Sıralamada açıklama metni veren fonksiyon
+  const getSortingStatusText = () => {
+    if (!sortConfig && !tempSortConfig) return null;
 
-    const cardVariants = {
-        visible: { opacity: 1, x: 0 },
-        hidden: { opacity: 0, x: -100 }
-    };
+    return tempSortConfig
+      ? tempSortConfig.sortBy === sortConfig?.sortBy
+        ? tempSortConfig.direction !== sortConfig?.direction
+          ? "Sıralanan sütun aynı, sadece yönü değişecektir."
+          : "Sıralama değişmeyecektir."
+        : `Sıralama, ${getColumnHeaderByKey(
+            tempSortConfig.sortBy
+          )} sütununa göre yapılacaktır.`
+      : `Şuanda sıralama ${getColumnHeaderByKey(
+          sortConfig.sortBy
+        )} sütununa göre yapılmaktadır.`;
+  };
 
-    return (
-        <div id='GenericCardList' className='flex flex-col gap-2'>
-            {isLoading ? (
-               <>
-                <Skeleton height={35} width={100} count={3} borderRadius={8} containerClassName='flex flex-row gap-2' baseColor={`var(--skeleton-base-color)`}  highlightColor={`var(--skeleton-highlight-color)`} duration={1.6}/> 
-                <Skeleton height={20} width={300} borderRadius={5}  className='p-0 mt-2' baseColor={`var(--skeleton-base-color)`}  highlightColor={`var(--skeleton-highlight-color)`} duration={1.2}/> 
-                <Skeleton height={60} count={3} borderRadius={10} className='p-0 mt-2' baseColor={`var(--skeleton-base-color)`}  highlightColor={`var(--skeleton-highlight-color)`} duration={1.4}/> 
-                </>
-            ) : (
-                data.length > 0 ? (
-                    <div className='flex flex-col gap-2'>
-                        <ActionBar buttons={actionBarButtons}/>
-                        {data && <div className='font-light'>{data.length} veri listeleniyor</div>}
-                        <motion.div
-                            className='flex flex-col gap-4'
-                            initial="hidden"
-                            animate="visible"
-                            variants={listVariants}
+  // ActionBar butons
+  const actionBarButtons: ActionButtonProps[] = [
+    {
+      text: toggleAllCardButtonText,
+      onClick: toggleAllCardButtonFunc,
+    },
+    ...(isSortableColumnPresent
+      ? [{ text: "Sırala", onClick: () => setIsSortDialogOpen(true) }]
+      : []),
+    ...(actions ?? []),
+  ];
+
+  // useSort hook'unu başlangıç sıralama yapılandırması
+  const initialSortConfig = useMemo(
+    () => getInitialSortConfig(columns, initialSortBy),
+    [initialSortBy, columns]
+  );
+  const { sortedItems, sortConfig, requestSort } = useSort<T>(
+    data,
+    initialSortConfig
+  );
+
+  // useMemo kullanarak başlık sütunu ve render fonksiyonunu hesaplama
+  const renderTitle = useMemo(() => {
+    const column = columns.find((c) => c.key === titleKey);
+    if (column && column.render) {
+      return (item: T) => column.render!(item);
+    } else {
+      return (item: T) => renderContent(item[titleKey as keyof T]);
+    }
+  }, [columns, titleKey]);
+
+  const listVariants = {
+    visible: { transition: { staggerChildren: 0.05, delayChildren: 0.2 } },
+    hidden: {},
+  };
+
+  const cardVariants = {
+    visible: { opacity: 1, x: 0 },
+    hidden: { opacity: 0, x: -100 },
+  };
+
+  return (
+    <div id="GenericCardList" className="flex flex-col gap-2">
+      {isLoading ? (
+        <>
+          <Skeleton
+            height={35}
+            width={100}
+            count={3}
+            borderRadius={8}
+            containerClassName="flex flex-row gap-2"
+            baseColor={`var(--skeleton-base-color)`}
+            highlightColor={`var(--skeleton-highlight-color)`}
+            duration={1.6}
+          />
+          <Skeleton
+            height={20}
+            width={300}
+            borderRadius={5}
+            className="p-0 mt-2"
+            baseColor={`var(--skeleton-base-color)`}
+            highlightColor={`var(--skeleton-highlight-color)`}
+            duration={1.2}
+          />
+          <Skeleton
+            height={60}
+            count={3}
+            borderRadius={10}
+            className="p-0 mt-2"
+            baseColor={`var(--skeleton-base-color)`}
+            highlightColor={`var(--skeleton-highlight-color)`}
+            duration={1.4}
+          />
+        </>
+      ) : data.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <ActionBar buttons={actionBarButtons} />
+          {data && (
+            <div className="font-light">{data.length} veri listeleniyor</div>
+          )}
+          <motion.div
+            className="flex flex-col gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={listVariants}
+          >
+            {sortedItems.map((item, index) => (
+              <motion.div key={index} variants={cardVariants}>
+                <AccordionCard
+                  key={index}
+                  title={renderTitle(item)}
+                  isOpen={isAllCardOpen || index === openCardIndex}
+                  onClick={() => toggleCard(index)}
+                >
+                  {columns.map(
+                    (column, colIndex) =>
+                      column.key !== titleKey && (
+                        <span key={colIndex} className="block">
+                          <span className="">{column.header}:</span>&nbsp;
+                          {column.render ? (
+                            <span className="font-bold">
+                              {column.render(item)}
+                            </span>
+                          ) : (
+                            <strong>
+                              {renderContent(item[column.key as keyof T])}
+                            </strong>
+                          )}
+                        </span>
+                      )
+                  )}
+                  {cardDropdownOptions &&
+                    cardDropdownOptions(item).length > 0 && (
+                      <div className="relative inline-block mt-2 ">
+                        <button
+                          className={` px-4 py-2 rounded-lg cursor-default text-sm whitespace-nowrap transition ease-in-out duration-300 bg-primary hover:bg-primary-lighter dark:hover:bg-primary-darker text-text-darkest dark:text-text-lightest`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setActiveDropdownIndex(
+                              activeDropdownIndex === index ? null : index
+                            );
+                          }}
                         >
-                            {sortedItems.map((item, index) => (  
-                                <motion.div
-                                key={index}
-                                variants={cardVariants}
-                                >
-                                    <AccordionCard  key={index}
-                                        title={renderTitle(item)}
-                                        isOpen={isAllCardOpen || index === openCardIndex}
-                                        onClick={() => toggleCard(index)}
-                                    >
-                                        {columns.map((column, colIndex) => (
-                                            column.key !== titleKey && (
-                                                <span key={colIndex} className="block">
-                                                    <span className="">{column.header}:</span>&nbsp;
-                                                    {column.render ? column.render(item) :<strong>{renderContent(item[column.key as keyof T])}</strong>}
-                                                </span>
-                                            )
-                                        ))}
-                                        {cardDropdownOptions && cardDropdownOptions(item).length > 0 && (
-                                            <div className="relative inline-block mt-2 ">
+                          İşlemler
+                        </button>
 
-                                                <button
-                                                    className={ ` px-4 py-2 rounded-lg cursor-default text-sm whitespace-nowrap transition ease-in-out duration-300 bg-primary hover:bg-primary-lighter dark:hover:bg-primary-darker text-text-darkest dark:text-text-lightest`}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        setActiveDropdownIndex(activeDropdownIndex === index ? null : index)
-                                                    }}
-                                                >
-                                                    İşlemler
-                                                </button>
-
-                                                {activeDropdownIndex === index && (
-                                                    <DropdownMenu
-                                                        id={`card-dropdown-${index}`}
-                                                        options={cardDropdownOptions(item)}
-                                                        closeDropdown={() => setActiveDropdownIndex(null)}
-                                                    />
-                                                )}
-                                            </div>
-                                        )}
-                                    </AccordionCard>
-                                </motion.div>
-                        ))}
-                        </motion.div>
-                    </div>
-                ): (
-                    <div className="text-center py-5 flex flex-col gap-4">
-                        <span className='text-3xl opacity-20 cursor-default'>Gösterilecek veri yok</span>
-                        <button onClick={() => window.location.reload()} className='text-lg opacity-40 hover:opacity-80 cursor-default'>Sayfayı Yenileyin</button>
-                    </div>
-                )
-            )}
-            <Dialog title='Sırala' confirmButtonLabel='Sırala' isOpen={isSortDialogOpen} onClose={()=> setIsSortDialogOpen(false)} onConfirm={()=> tempSortConfig && (tempSortConfig.sortBy !== sortConfig.sortBy || tempSortConfig.direction !== sortConfig.direction) && requestSort(tempSortConfig.sortBy)}>
-               <div>
-                    <div className='text-sm font-light mb-2'>Sıralamak istediğiniz sütunu seçin.</div>
-                    <div className='flex flex-col gap-2'>
-                        {sortableColumns.map((column, index) => (
-                            <button key={index} onClick={() => handleSortSelection(column.key)}  className={ `px-4 py-3 text-left w-full text-sm font-medium border ${getButtonStyle(column.key)} border-background rounded-lg`}>
-                                <div className='flex justify-between items-center'>
-                                    {column.header}
-                                    {getSortIcon(column.key)}
-                                </div>
-                            </button> 
-                        ))}
-                    </div>
-                    {getSortingStatusText() && <div className="text-sm font-light mt-2">{getSortingStatusText()}</div>}
-               </div>
-            </Dialog>
+                        {activeDropdownIndex === index && (
+                          <DropdownMenu
+                            id={`card-dropdown-${index}`}
+                            options={cardDropdownOptions(item)}
+                            closeDropdown={() => setActiveDropdownIndex(null)}
+                          />
+                        )}
+                      </div>
+                    )}
+                </AccordionCard>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
-    );
-}
+      ) : (
+        <div className="text-center py-5 flex flex-col gap-4">
+          <span className="text-3xl opacity-20 cursor-default">
+            Gösterilecek veri yok
+          </span>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-lg opacity-40 hover:opacity-80 cursor-default"
+          >
+            Sayfayı Yenileyin
+          </button>
+        </div>
+      )}
+      <Dialog
+        title="Sırala"
+        confirmButtonLabel="Sırala"
+        isOpen={isSortDialogOpen}
+        onClose={() => setIsSortDialogOpen(false)}
+        onConfirm={() =>
+          tempSortConfig &&
+          (tempSortConfig.sortBy !== sortConfig.sortBy ||
+            tempSortConfig.direction !== sortConfig.direction) &&
+          requestSort(tempSortConfig.sortBy)
+        }
+      >
+        <div>
+          <div className="text-sm font-light mb-2">
+            Sıralamak istediğiniz sütunu seçin.
+          </div>
+          <div className="flex flex-col gap-2">
+            {sortableColumns.map((column, index) => (
+              <button
+                key={index}
+                onClick={() => handleSortSelection(column.key)}
+                className={`px-4 py-3 text-left w-full text-sm font-medium border ${getButtonStyle(
+                  column.key
+                )} border-background rounded-lg`}
+              >
+                <div className="flex justify-between items-center">
+                  {column.header}
+                  {getSortIcon(column.key)}
+                </div>
+              </button>
+            ))}
+          </div>
+          {getSortingStatusText() && (
+            <div className="text-sm font-light mt-2">
+              {getSortingStatusText()}
+            </div>
+          )}
+        </div>
+      </Dialog>
+    </div>
+  );
+};
 
 export default GenericCardList;

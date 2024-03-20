@@ -50,7 +50,6 @@ const DeleteAItem: React.FC<DeleteAItemProps> = ({ isOpen, onClose, item }) => {
     <>
       <Loader isLoading={isLoading} messages={["Sayım Siliniyor"]} />
       <Dialog
-        isSmallDialog
         isOpen={isOpen}
         onClose={onClose}
         title="Sayımı Sil"

@@ -103,7 +103,6 @@ const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {
     <>
       <Loader isLoading={isLoading} messages={["Tarihler Güncelleniyor"]} />
       <Dialog
-        isSmallDialog
         isOpen={isOpen}
         onClose={handleClose}
         title="Tarih Güncelle"

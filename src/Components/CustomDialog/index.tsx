@@ -32,7 +32,6 @@ const Dialog: FC<DialogProps> = ({
   showCancelButton = false,
   onConfirm,
   onCancel,
-  isSmallDialog = false,
   isDeactivateCloseAfterConfirm = false,
   cancelButtonLabel = "Vazgeç",
   confirmButtonLabel = "Onayla",
@@ -106,13 +105,7 @@ const Dialog: FC<DialogProps> = ({
             <hr className="border-t border-background mt-2 mb-4 w-full" />
             {/* Dialog Content */}
             <form onSubmit={handleSubmit}>
-              <div
-                className={`max-h-[50vh] ${
-                  isSmallDialog ? "overflow-visible" : "overflow-auto"
-                }`}
-              >
-                {children}
-              </div>
+              <div className={`max-h-[50vh] overflow-auto`}>{children}</div>
               {/* Dialog Buttons */}
               <div className="flex justify-end mt-4 space-x-3">
                 {showCancelButton && (

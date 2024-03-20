@@ -61,7 +61,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     <div
       id={`dropdown-menu-${id}`}
       ref={dropdownRef}
-      className={`absolute flex flex-col items-center min-w-[200px] max-w-[400px] max-h-[50vh] overflow-auto z-50 bg-background-lightest dark:bg-background-darkest shadow-2xl rounded-lg p-2 space-y-2 ${positionStyle}`}
+      className={`absolute flex border border-primary flex-col items-center min-w-[200px] max-w-[400px] max-h-[50vh] overflow-auto z-50 bg-background-lightest dark:bg-background-darkest shadow-2xl rounded-lg p-2 space-y-2 ${positionStyle}`}
     >
       {options.map((option, index) => (
         <button
