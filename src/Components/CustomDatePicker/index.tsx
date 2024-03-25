@@ -3,10 +3,10 @@ import DatePicker, {
   ReactDatePickerProps,
   registerLocale,
 } from "react-datepicker"; // Locale kaydetmek için gerekli
-import { MdCancel } from "react-icons/md";
 import "react-datepicker/dist/react-datepicker.css";
 import "./index.css";
 import tr from "date-fns/locale/tr"; // Türkçe dil desteği için gerekli modül
+import CustomLabel from "../CustomLabel";
 
 registerLocale("tr", tr); // Türkçe'yi kaydet
 
@@ -39,7 +39,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   return (
     <div className="form-item">
-      {label && <label className="block text-sm mb-2">{label}</label>}
+      <CustomLabel title={label} className="block mb-2" />
       <DatePicker
         {...props}
         wrapperClassName="w-full"
@@ -56,7 +56,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         clearButtonTitle="Delete"
         className={`${
           isError ? "border-error" : ""
-        } form-control w-full p-2 border-2 border-opacity-30 dark:border-opacity-80 border-background bg-transparent rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300`}
+        } form-control w-full p-2 border-2 border-background/50 bg-transparent rounded-lg focus:border-primary focus:ring-0 focus:ring-primary text-text-darkest dark:text-text-lightest transition-colors duration-300`}
         minTime={minTime}
         maxTime={new Date(new Date().setHours(23, 59, 59, 999))}
         locale="tr"

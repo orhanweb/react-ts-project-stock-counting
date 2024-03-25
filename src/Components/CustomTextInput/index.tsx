@@ -1,6 +1,7 @@
 // Custom Text Input
 import React, { ChangeEvent } from "react";
 import { MdCancel } from "react-icons/md";
+import CustomLabel from "../CustomLabel";
 
 interface CustomTextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -34,10 +35,8 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
 
   return (
     <div className="custom-text-input">
-      <div className="flex flex-row justify-between">
-        <label htmlFor={id} className="block text-sm mb-2">
-          {label}
-        </label>
+      <div className="flex flex-row justify-between mb-2">
+        <CustomLabel title={label} htmlFor={id} />
         <div className="text-right text-xs font-mono mt-1 mr-2 cursor-default">
           {value.length}/{maxChars}
         </div>
@@ -52,7 +51,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
           onChange={onChange}
           className={`${
             isError ? "border-error" : ""
-          } border-2 bg-transparent border-background border-opacity-30 dark:border-opacity-80 p-2 rounded-lg w-full focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-text-darkest dark:text-text-lightest transition-colors duration-300`}
+          } border-2 bg-transparent border-background/50 p-2 rounded-lg w-full focus:border-primary focus:ring-0 text-text-darkest dark:text-text-lightest transition-colors duration-300`}
           {...props}
         />
         {value && (

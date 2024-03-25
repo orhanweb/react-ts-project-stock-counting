@@ -20,6 +20,7 @@ import { LuClipboardEdit } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import Skeleton from "react-loading-skeleton";
 import { formatDateV1 } from "../../Utils/formatDateFuncs";
+import CustomLabel from "../../Components/CustomLabel";
 
 const CreateCount: React.FC = () => {
   //Application hooks
@@ -259,7 +260,6 @@ const CreateCount: React.FC = () => {
             isError={!endDate && isFormInvalid}
           />
         </div>
-
         {/* Count Variant, Type and Area Selection */}
         {selectorConfigs.map((obj) => (
           <div key={obj.id} id={obj.id}>
@@ -299,9 +299,8 @@ const CreateCount: React.FC = () => {
             )}
           </div>
         ))}
-
         <div id="count-type-picker">
-          <label className="block text-sm mb-2">{`Sayılacak Yapı:`}</label>
+          <CustomLabel title={"Sayılacak Yapı:"} className="block mb-2" />
           <AutoComplete
             queryHook={(arg: any, skip: boolean) =>
               useQueryWrapper(useGetStructuresToCountQuery, arg, skip)
