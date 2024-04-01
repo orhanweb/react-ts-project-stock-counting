@@ -15,10 +15,10 @@ const LanguageToggle: React.FC<{
     { label: "Türkçe", onClick: () => changeLanguage("tr") },
   ];
 
-  // Kullanıcının dil tercihini localStorage'a kaydeden ve i18n dilini değiştiren fonksiyon
+  // Function that saves the user's language preference to localStorage and changes the i18n language
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
-    localStorage.setItem("language", lang); // Kullanıcının dil tercihini localStorage'a kaydet
+    localStorage.setItem("language", lang); // Save user's language preference to localStorage
     toggleSidebar(false);
   };
 

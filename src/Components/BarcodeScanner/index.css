@@ -1,14 +1,13 @@
 #qr-reader select {
-    background-color: transparent !important;
+  background-color: transparent !important;
 }
 
-/* Açık tema için */
+/* For open theme */
 #qr-reader select option {
-    background-color: rgb(250, 250, 250) !important;
+  background-color: rgb(250, 250, 250) !important;
 }
-  
-/* Karanlık tema için */
+
+/* For dark theme */
 .dark #qr-reader select option {
-background-color: rgb(86, 86, 86) !important;
+  background-color: rgb(86, 86, 86) !important;
 }
-  

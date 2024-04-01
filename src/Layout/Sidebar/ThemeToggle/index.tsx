@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import { MdDarkMode, MdLightMode } from 'react-icons/md';
-import ResponsiveIconButton from '../../../Components/Buttons/ResponsiveIconButton';
+import React, { useState } from "react";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
+import ResponsiveIconButton from "../../../Components/Buttons/ResponsiveIconButton";
 
-const ThemeToggle: React.FC<{ toggleSidebar: (isOpen:boolean) => void}> = ({toggleSidebar}) => {
-  // İlk render'da doğru temayı almak için useEffect kullanılır.
+const ThemeToggle: React.FC<{ toggleSidebar: (isOpen: boolean) => void }> = ({
+  toggleSidebar,
+}) => {
+  // useEffect is used to get the correct theme on the first render.
   const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
+    return localStorage.getItem("theme") === "dark";
   });
 
-  // Temayı değiştirdikçe isDark state'ini ve localStorage'ı güncelle
+  // Update isDark state and localStorage as you change theme
   const toggleTheme = () => {
-    const newTheme = isDark ? 'light' : 'dark';
-    setIsDark(!isDark); // isDark state'ini güncelle
-    localStorage.setItem('theme', newTheme); // Yeni temayı localStorage'a kaydet
-    document.documentElement.classList.remove('light', 'dark');
+    const newTheme = isDark ? "light" : "dark";
+    setIsDark(!isDark); // Update isDark state
+    localStorage.setItem("theme", newTheme); // Save new theme to localStorage
+    document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(newTheme);
     toggleSidebar(false);
   };
@@ -21,8 +23,8 @@ const ThemeToggle: React.FC<{ toggleSidebar: (isOpen:boolean) => void}> = ({togg
   return (
     <ResponsiveIconButton
       onClick={toggleTheme}
-      Icon={isDark ? MdLightMode : MdDarkMode} 
-      title={isDark ? 'Açık Tema' : 'Koyu Tema'} 
+      Icon={isDark ? MdLightMode : MdDarkMode}
+      title={isDark ? "Açık Tema" : "Koyu Tema"}
     />
   );
 };

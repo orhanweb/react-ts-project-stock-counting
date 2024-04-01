@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { debounce } from 'lodash';
-import { AutoCompleteV2Props } from './index.d';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { debounce } from "lodash";
+import { AutoCompleteV2Props } from "./index.d";
 
 const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
   queryHook,
@@ -10,18 +10,18 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
   selectedSuggestion,
   onSelect,
   disabled = false,
-  isError= false,
+  isError = false,
   externalInputValue,
-  ignoreResetOnSelectedSuggestionNull = false
+  ignoreResetOnSelectedSuggestionNull = false,
 }) => {
-  const [inputValue, setInputValue] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>("");
   const [debouncedValue, setDebouncedValue] = useState<string>(inputValue);
 
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const autoCompleteRef = useRef<HTMLDivElement>(null);
 
-  // Değişen inputValue'yi takip eden debounce işlemi
+  // Debounce action following changing inputValue
   const updateDebouncedValue = useCallback(
     debounce((nextValue) => {
       setDebouncedValue(nextValue);
@@ -29,44 +29,50 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
     []
   );
 
-  // API çağrısından dönen verileri dinle
-  const { data: dataSuggestions, isFetching } = queryHook(debouncedValue, inputValue.length < 3);
+  // Listen for data returned from API call
+  const { data: dataSuggestions, isFetching } = queryHook(
+    debouncedValue,
+    inputValue.length < 3
+  );
 
   useEffect(() => {
     if (dataSuggestions) {
       setSuggestions(dataSuggestions);
     }
   }, [dataSuggestions]);
-  
+
   useEffect(() => {
-    // Sadece externalInputValue boş string değilse güncelle
-    if (externalInputValue !== undefined && externalInputValue !== '' && externalInputValue !== inputValue) {
+    // Update only if externalInputValue is not empty string
+    if (
+      externalInputValue !== undefined &&
+      externalInputValue !== "" &&
+      externalInputValue !== inputValue
+    ) {
       setInputValue(externalInputValue);
       setDebouncedValue(externalInputValue);
       setShowSuggestions(true);
-    }  
+    }
   }, [externalInputValue]);
 
   useEffect(() => {
     if (!selectedSuggestion && !ignoreResetOnSelectedSuggestionNull) {
-      setInputValue(''); // input değerini sıfırla
-      setDebouncedValue(''); // debounced değeri sıfırla
-      setShowSuggestions(false); // öneri listesini kapat
+      setInputValue(""); // reset input value
+      setDebouncedValue(""); // reset debounced value
+      setShowSuggestions(false); // close the suggestion list
     }
   }, [selectedSuggestion]);
 
-
-  // Kullanıcı girişi değiştiğinde
+  // When user input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!disabled) {
       setInputValue(e.target.value);
-      updateDebouncedValue(e.target.value)
+      updateDebouncedValue(e.target.value);
       onSelect(null);
       setShowSuggestions(true);
     }
   };
 
-  // Öneri seçildiğinde
+  // When a suggestion is selected
   const handleSuggestionClick = (suggestion: any) => {
     if (!disabled) {
       setInputValue(formatInputValue(suggestion));
@@ -75,20 +81,23 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
     }
   };
 
-  // Bileşenin dışına tıklandığında kapat
+  // Close when clicking outside of component
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (autoCompleteRef.current && !autoCompleteRef.current.contains(event.target as Node)) {
+      if (
+        autoCompleteRef.current &&
+        !autoCompleteRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
         if (!selectedSuggestion) {
-          setInputValue('');
+          setInputValue("");
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [selectedSuggestion]);
 
@@ -98,10 +107,12 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className={`${isError ? 'border-error' : ''} w-full border-2 border-opacity-30 dark:border-opacity-80 rounded-lg p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out`}
+        className={`${
+          isError ? "border-error" : ""
+        } w-full border-2 border-opacity-30 dark:border-opacity-80 rounded-lg p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out`}
         placeholder={placeholder}
         disabled={disabled}
-        onFocus={()=>setShowSuggestions(true)}
+        onFocus={() => setShowSuggestions(true)}
       />
 
       {showSuggestions && (
@@ -109,7 +120,9 @@ const AutoCompleteV2: React.FC<AutoCompleteV2Props> = ({
           {isFetching ? (
             <li className="p-2 cursor-default text-text-lighter">Loading...</li>
           ) : inputValue.length < 3 ? (
-            <li className="p-2 cursor-default text-text-lighter">Minimum 3 karakter giriniz</li>
+            <li className="p-2 cursor-default text-text-lighter">
+              Minimum 3 karakter giriniz
+            </li>
           ) : suggestions.length > 0 ? (
             suggestions.map((suggestion) => (
               <li

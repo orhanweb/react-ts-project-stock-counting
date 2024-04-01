@@ -48,17 +48,17 @@ const GenericCardList = <T extends {}>({
     () => columns.some((column) => column.sortable),
     [columns]
   );
-  // Sıralanabilir sütunların listesi
+  // List of sortable columns
   const sortableColumns = useMemo(
     () => columns.filter((column) => column.sortable),
     [columns]
   );
 
-  // Sıralanacak sütun için seçme mantığı
+  // Selection logic for the column to sort
   const handleSortSelection = (columnKey: keyof T) => {
     setTempSortConfig((prevConfig) => {
       if (sortConfig.sortBy === columnKey && !prevConfig) {
-        // Eğer zaten sıralanan sütun seçilirse
+        // If already sorted column is selected
         return {
           sortBy: columnKey,
           direction:
@@ -67,7 +67,7 @@ const GenericCardList = <T extends {}>({
               : SortDirection.ASCENDING,
         };
       } else {
-        // Eğer aynı sütun seçilirse, yönü değiştir
+        // If the same column is selected, change direction
         return prevConfig && prevConfig.sortBy === columnKey
           ? {
               sortBy: columnKey,
@@ -81,17 +81,17 @@ const GenericCardList = <T extends {}>({
     });
   };
 
-  // Dialog açılıp kapandığında geçici sıralama state'ini null'a çek
+  // Set temporary sorting state to null when dialog is opened and closed
   useEffect(() => setTempSortConfig(null), [isSortDialogOpen]);
 
-  // Sıralanan sütun için buton renklendirmesi
+  // Button coloring for sorted column
   const getButtonStyle = (columnKey: keyof T) => {
     const activeConfig = tempSortConfig || sortConfig;
     const isActive = activeConfig && activeConfig.sortBy === columnKey;
     return isActive ? "border-primary text-primary" : "border-background";
   };
 
-  // Sıralanan sütun için artan azalan ikonları döndüren fonksiyon
+  // Function that returns ascending and descending icons for the sorted column
   const getSortIcon = (columnKey: keyof T) => {
     const activeConfig = tempSortConfig || sortConfig;
     if (activeConfig && activeConfig.sortBy === columnKey) {
@@ -104,13 +104,13 @@ const GenericCardList = <T extends {}>({
     return null;
   };
 
-  // Sütunlarda key alıp header döndüren fonksiyon
+  // Function that takes keys in columns and returns headers
   const getColumnHeaderByKey = (key: keyof T) => {
     const column = columns.find((c) => c.key === key);
     return column ? column.header : "";
   };
 
-  // Sıralamada açıklama metni veren fonksiyon
+  // Function that gives description text in sorting
   const getSortingStatusText = () => {
     if (!sortConfig && !tempSortConfig) return null;
 
@@ -127,7 +127,7 @@ const GenericCardList = <T extends {}>({
         )} sütununa göre yapılmaktadır.`;
   };
 
-  // ActionBar butons
+  // ActionBar buttons
   const actionBarButtons: ActionButtonProps[] = [
     {
       text: toggleAllCardButtonText,
@@ -139,7 +139,7 @@ const GenericCardList = <T extends {}>({
     ...(actions ?? []),
   ];
 
-  // useSort hook'unu başlangıç sıralama yapılandırması
+  // Initial sorting configuration of the useSort hook
   const initialSortConfig = useMemo(
     () => getInitialSortConfig(columns, initialSortBy),
     [initialSortBy, columns]
@@ -149,7 +149,7 @@ const GenericCardList = <T extends {}>({
     initialSortConfig
   );
 
-  // useMemo kullanarak başlık sütunu ve render fonksiyonunu hesaplama
+  // Calculating header column and render function using useMemo
   const renderTitle = useMemo(() => {
     const column = columns.find((c) => c.key === titleKey);
     if (column && column.render) {
@@ -300,6 +300,7 @@ const GenericCardList = <T extends {}>({
           <div className="flex flex-col gap-2">
             {sortableColumns.map((column, index) => (
               <button
+                type="button"
                 key={index}
                 onClick={() => handleSortSelection(column.key)}
                 className={`px-4 py-3 text-left w-full text-sm font-medium border ${getButtonStyle(

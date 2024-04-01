@@ -1,18 +1,18 @@
 import { useState, useMemo } from "react";
 
-// Sıralama yönlerini tanımlayan enum
+// Enum defining sorting aspects
 export enum SortDirection {
   ASCENDING = "ascending",
   DESCENDING = "descending",
 }
 
-// SortConfig için güncellenmiş interface
+// Updated interface for SortConfig
 export interface SortConfig<T> {
-  sortBy: keyof T; // Hangi özelliğe göre sıralanacağı
-  direction: SortDirection; // Sıralama yönü
+  sortBy: keyof T; // According to which feature will it be sorted?
+  direction: SortDirection; // Sort direction
 }
 
-// Generic useSort hook'u
+// Generic useSort hook
 const useSort = <T extends {}>(
   items: T[],
   initialSortConfig: SortConfig<T>
@@ -20,7 +20,7 @@ const useSort = <T extends {}>(
   const [sortConfig, setSortConfig] =
     useState<SortConfig<T>>(initialSortConfig);
 
-  // Sıralama isteği fonksiyonu
+  // Sorting request function
   const requestSort = (sortBy: keyof T) => {
     let direction = SortDirection.ASCENDING;
     if (
@@ -33,7 +33,7 @@ const useSort = <T extends {}>(
     setSortConfig({ sortBy, direction });
   };
 
-  // Sıralama işlemi
+  // Sorting process
   const sortedItems = useMemo(() => {
     let sortableItems = [...items];
     if (sortConfig !== null) {

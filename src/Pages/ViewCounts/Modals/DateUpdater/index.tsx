@@ -3,7 +3,11 @@ import Dialog from "../../../../Components/CustomDialog";
 import CustomDatePicker from "../../../../Components/CustomDatePicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { CountList } from "../../../../Redux/Models/apiTypes";
-import { formatDateV1, formatDateV2 } from "../../../../Utils/formatDateFuncs";
+import {
+  formatDateV1,
+  formatDateV2,
+  convertStringToDate,
+} from "../../../../Utils/formatDateFuncs";
 import { useUpdateCountDatesMutation } from "../../../../Redux/Services/countFormAPI";
 import { useNotifications } from "../../../../Hooks/useNotifications";
 import { NotificationType } from "../../../../Components/Notification/index.d";
@@ -21,11 +25,11 @@ const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {
   //Queries
   const [updateCountDates, { isLoading }] = useUpdateCountDatesMutation();
   //Notifications
-  const { addNotification } = useNotifications(); // Bildirim ekleme fonksiyonu
+  const { addNotification } = useNotifications(); // Notification adding function
 
   // --- FUNCTION: Submit
   const handleConfirm = async () => {
-    // item kontrolü
+    // item check
     if (!item) {
       addNotification(
         "Bir sorun oluştu, tekrar deneyin.",
@@ -33,7 +37,6 @@ const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {
       );
       return;
     }
-
     // Check if startDate and endDate are both empty
     if (!dates.startDate && !dates.endDate) {
       addNotification(
@@ -44,7 +47,27 @@ const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {
       return;
     }
 
-    // Başlangıç ve Bitiş tarihleri kontrolü
+    // Convert dates from item variable to UTC
+    const itemStartDate = convertStringToDate(item.baslangic);
+    const itemEndDate = convertStringToDate(item.bitis);
+
+    if (!dates.startDate && dates.endDate && dates.endDate < itemStartDate) {
+      addNotification(
+        "Bitiş tarihi, mevcut başlangıç tarihinden önce olamaz.",
+        NotificationType.Error
+      );
+      return;
+    }
+
+    if (dates.startDate && !dates.endDate && dates.startDate > itemEndDate) {
+      addNotification(
+        "Başlangıç tarihi, mevcut bitiş tarihinden sonra olamaz.",
+        NotificationType.Error
+      );
+      return;
+    }
+
+    // Start and End dates control
     if (dates.startDate && dates.endDate && dates.startDate > dates.endDate) {
       addNotification(
         "Başlangıç tarihi, bitiş tarihinden sonra olamaz.",
@@ -53,7 +76,7 @@ const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {
       return;
     }
 
-    // Mevcut zaman kontrolü
+    // Current time control
     const currentDate = new Date();
     if (
       (dates.startDate && dates.startDate < currentDate) ||
@@ -84,7 +107,7 @@ const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {
       );
       handleClose();
     } catch (error) {
-      // Hata yönetimi
+      // Error managament
       const err = error as { data?: { message?: string }; status?: number };
       addNotification(
         `Tarih güncelleme işleminde hata oluştu: ${err.data?.message} ${err.status}`,

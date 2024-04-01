@@ -1,6 +1,6 @@
 export interface AccordionCardProps {
-    title: React.ReactNode;
-    isOpen: boolean;
-    onClick: () => void; // Başlık tıklandığında tetiklenecek fonksiyon
-    children: React.ReactNode;
+  title: React.ReactNode;
+  isOpen: boolean;
+  onClick: () => void; // Function to be triggered when the title is clicked
+  children: React.ReactNode;
 }

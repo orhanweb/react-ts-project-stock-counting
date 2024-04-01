@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import DatePicker, {
   ReactDatePickerProps,
   registerLocale,
-} from "react-datepicker"; // Locale kaydetmek için gerekli
+} from "react-datepicker"; // Required to save locale
 import "react-datepicker/dist/react-datepicker.css";
 import "./index.css";
-import tr from "date-fns/locale/tr"; // Türkçe dil desteği için gerekli modül
+import tr from "date-fns/locale/tr"; // Required module for Turkish language support
 import CustomLabel from "../CustomLabel";
 
-registerLocale("tr", tr); // Türkçe'yi kaydet
+registerLocale("tr", tr); // Save Turkish
 
 interface CustomDatePickerProps extends ReactDatePickerProps {
   label?: string;

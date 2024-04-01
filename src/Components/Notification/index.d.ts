@@ -1,14 +1,14 @@
-// Notification türünü belirleme
+// Determining Notification type
 export interface NotificationProps {
-    id: number;
-    message: string;
-    type: NotificationType;
+  id: number;
+  message: string;
+  type: NotificationType;
 }
 
-// Bildirim tiplerini enum olarak tanımlama
+// Defining notification types as enum
 export enum NotificationType {
-    Warning = 'warning',
-    Info = 'info',
-    Error = 'error',
-    Success = 'success'
+  Warning = "warning",
+  Info = "info",
+  Error = "error",
+  Success = "success",
 }

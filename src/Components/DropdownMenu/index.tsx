@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DropdownMenuProps } from "./index.d";
 
-// Modüler Dropdown
+// Modular Dropdown
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
   id,
   options,
@@ -10,7 +10,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  let newPositionStyle = "left-0 top-full"; // Varsayılan pozisyon
+  let newPositionStyle = "left-0 top-full"; // default position
   const [positionStyle, setPositionStyle] = useState<string>(
     `opacity-0 ${newPositionStyle}`
   );
@@ -21,7 +21,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
 
-      // Varsayılan konum kontrolü ve alternatifler...
+      // Default location control and alternatives...
       if (
         dropdownRect.right + 20 > windowWidth &&
         dropdownRect.bottom <= windowHeight
@@ -48,7 +48,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        closeDropdown(); // Dropdown'ı kapat
+        closeDropdown();
       }
     };
     document.addEventListener("click", handleClickOutside as any);

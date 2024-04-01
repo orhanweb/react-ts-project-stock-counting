@@ -25,7 +25,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   ...props
 }) => {
   const clearInput = () => {
-    // Yapay bir event oluşturarak onChange fonksiyonunu tetikle
+    // Trigger the onChange function by creating a dummy event
     const event = {
       target: { value: "" },
       currentTarget: { value: "" },

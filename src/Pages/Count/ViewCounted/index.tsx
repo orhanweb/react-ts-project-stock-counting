@@ -1,8 +1,8 @@
 // src/Pages/ViewCounted.tsx
-import React from 'react';
+import React from "react";
 
 const ViewCounted: React.FC = () => {
-  // Sayım oluşturma formu ve mantığı burada olacak
+  // The count creation form and logic will be here
   return <div>View Counted Page</div>;
 };
 

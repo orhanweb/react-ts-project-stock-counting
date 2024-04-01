@@ -25,7 +25,7 @@ import CustomLabel from "../../Components/CustomLabel";
 const CreateCount: React.FC = () => {
   //Application hooks
   const { t } = useTranslation();
-  const { addNotification } = useNotifications(); // Bildirim ekleme fonksiyonu
+  const { addNotification } = useNotifications(); // Notification adding function
 
   // States to be sent to the server
   const [countName, setCountName] = useState<string>("");

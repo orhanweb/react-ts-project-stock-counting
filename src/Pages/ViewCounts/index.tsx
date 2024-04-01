@@ -21,11 +21,10 @@ import { IoCalendar } from "react-icons/io5";
 import { FaPlay } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 
-// Dialog durumlarını kontrol etmek için bir nesne
+// An object to control dialog states
 const initialDialogState = {
   isDateUpdaterOpen: false,
   isDeleteConfirmationOpen: false,
-  // İleride ekleyebileceğiniz diğer dialoglar için daha fazla alan eklenebilir
 };
 
 const ViewCounts: React.FC = () => {
@@ -96,7 +95,8 @@ const ViewCounts: React.FC = () => {
     setDialogState(initialDialogState);
   };
 
-  // Kullanıcıyı sayım sayfasına yönlendirdiğinde eğer sayımın süresi dolmuş veya kapalı ise kullanıcıyı not found sayfasına yönlendir   navigate('/not-found', { state: { message: 'Sayım kapalı.' } })
+  // When you redirect the user to the counting page,
+  // if the counting has expired or is closed, redirect the user to the not found page navigate('/not-found', { state: { message: 'Counting is closed.' } })
   const createDropdownOptions = (item: CountList) => [
     ...(item.durum === "1"
       ? [

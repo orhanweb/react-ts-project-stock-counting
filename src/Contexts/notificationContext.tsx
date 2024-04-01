@@ -1,32 +1,41 @@
-import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import Notification from '../Components/Notification';
-import { NotificationProps, NotificationType } from '../Components/Notification/index.d';
-import { AnimatePresence } from 'framer-motion';
+import React, { createContext, useState, ReactNode, useEffect } from "react";
+import Notification from "../Components/Notification";
+import {
+  NotificationProps,
+  NotificationType,
+} from "../Components/Notification/index.d";
+import { AnimatePresence } from "framer-motion";
 
-const NOTIFICATION_TIMEOUT = 3000; // 3 saniyelik zaman aşımı süresi
+const NOTIFICATION_TIMEOUT = 3000; // 3 second timeout period
 
-// Context için interface tanımı
+// Interface definition for context
 interface INotificationContext {
   addNotification: (message: string, type: NotificationType) => void;
 }
 
-export const NotificationContext = createContext<INotificationContext | null>(null);
+export const NotificationContext = createContext<INotificationContext | null>(
+  null
+);
 
 interface NotificationProviderProps {
   children: ReactNode;
 }
 
-export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
+export const NotificationProvider: React.FC<NotificationProviderProps> = ({
+  children,
+}) => {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
   const removeNotification = (id: number) => {
-    setNotifications(notifications => notifications.filter(notification => notification.id !== id));
+    setNotifications((notifications) =>
+      notifications.filter((notification) => notification.id !== id)
+    );
   };
-  
+
   const addNotification = (message: string, type: NotificationType) => {
     const id = new Date().getTime();
     const newNotification = { id, message, type };
-    setNotifications(prev => [newNotification, ...prev]);
+    setNotifications((prev) => [newNotification, ...prev]);
     setTimeout(() => removeNotification(id), NOTIFICATION_TIMEOUT);
   };
 
@@ -35,7 +44,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       setNotifications(notifications.slice(0, 5));
     }
   }, [notifications]);
-  
 
   return (
     <NotificationContext.Provider value={{ addNotification }}>

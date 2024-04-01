@@ -6,30 +6,30 @@ export default {
     extend: {
       colors: {
         primary: {
-          lightest: "#bcf4d2", // En açık ton
-          lighter: "#8eedb8", // Daha açık ton
-          light: "#61e69e", // Açık ton
-          DEFAULT: "#1dc46b", // Standart ana renk
-          dark: "#1baf62", // Koyu ton
-          darker: "#198a58", // Daha koyu ton
-          darkest: "#17654f", // En koyu ton
+          lightest: "#bcf4d2", // Lightest shade
+          lighter: "#8eedb8", // Lighter shade
+          light: "#61e69e", // Light shade
+          DEFAULT: "#1dc46b", // Standard primary color
+          dark: "#1baf62", // Dark shade
+          darker: "#198a58", // Darker shade
+          darkest: "#17654f", // Darkest shade
         },
         background: {
-          lightest: "#ffffff", // En açık arka plan rengi (açık tema için)
-          lighter: "#f2f2f2", // Daha açık arka plan rengi (açık tema için)
-          light: "#e5e5e5", // Açık arka plan rengi (açık tema için)
+          lightest: "#ffffff", // Lightest background color (for light theme)
+          lighter: "#f2f2f2", // Lighter background color (for light theme)
+          light: "#e5e5e5", // Light background color (for light theme)
           DEFAULT: "#707070",
-          dark: "#333333", // En açık arka plan rengi (karanlık tema için)
-          darker: "#2c2c2c", // Daha koyu arka plan rengi (karanlık tema için)
-          darkest: "#262626", // En koyu arka plan rengi (karanlık tema için)
+          dark: "#333333", // Lightest background color (for dark theme)
+          darker: "#2c2c2c", // Darker background color (for dark theme)
+          darkest: "#262626", // Darkest background color (for dark theme)
         },
         text: {
-          darkest: "#000000", // Açık temada en koyu metin rengi
-          darker: "#616161", // Açık temada orta koyu metin rengi
-          dark: "#757575", // Açık temada en açık koyu metin rengi
-          light: "#a6a6a6", // Karanlık temada en koyu açık metin rengi
-          lighter: "#bfbfbf", // Karanlık temada orta açık metin rengi
-          lightest: "#ffffff", // Karanlık temada en açık metin rengi
+          darkest: "#000000", // Darkest text color in light theme
+          darker: "#616161", // Mid dark text color in light theme
+          dark: "#757575", // Lightest dark text color in light theme
+          light: "#a6a6a6", // Darkest light text color in dark theme
+          lighter: "#bfbfbf", // Mid light text color in dark theme
+          lightest: "#ffffff", // Lightest text color in dark theme
         },
         success: "#00d633",
         error: "#ff2b2b",
