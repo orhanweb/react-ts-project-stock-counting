@@ -1,6 +1,6 @@
 // src/Pages/ViewCounts.tsx
 import React, { useEffect, useState } from "react";
-import { CountList } from "../../Redux/Models/apiTypes";
+import { CountInterface } from "../../Redux/Models/apiTypes";
 import { useNotifications } from "../../Hooks/useNotifications";
 import { NotificationType } from "../../Components/Notification/index.d";
 import GenericTable from "../../Components/GenericTable";
@@ -37,7 +37,7 @@ const ViewCounts: React.FC = () => {
   }>({ isLoading: false, messages: [] });
   const [dialogState, setDialogState] = useState(initialDialogState);
   const [selectedItemForDialogs, setSelectedItemForDialogs] = useState<
-    CountList | undefined
+    CountInterface | undefined
   >();
 
   // --- SERVICES
@@ -82,11 +82,11 @@ const ViewCounts: React.FC = () => {
   }, [isGetCountsLoading, isStartCountLoading, isEndCountLoading]);
 
   // --- DIALOG FUNCTIONS
-  const openDateUpdater = (item: CountList) => {
+  const openDateUpdater = (item: CountInterface) => {
     setSelectedItemForDialogs(item);
     setDialogState({ ...dialogState, isDateUpdaterOpen: true });
   };
-  const openDeleteConfirmation = (item: CountList) => {
+  const openDeleteConfirmation = (item: CountInterface) => {
     setSelectedItemForDialogs(item);
     setDialogState({ ...initialDialogState, isDeleteConfirmationOpen: true });
   };
@@ -95,9 +95,7 @@ const ViewCounts: React.FC = () => {
     setDialogState(initialDialogState);
   };
 
-  // When you redirect the user to the counting page,
-  // if the counting has expired or is closed, redirect the user to the not found page navigate('/not-found', { state: { message: 'Counting is closed.' } })
-  const createDropdownOptions = (item: CountList) => [
+  const createDropdownOptions = (item: CountInterface) => [
     ...(item.durum === "1"
       ? [
           {
@@ -222,7 +220,7 @@ const ViewCounts: React.FC = () => {
 
 export default ViewCounts;
 
-const viewCountsColumns: TableColumn<CountList>[] = [
+const viewCountsColumns: TableColumn<CountInterface>[] = [
   { header: "Sayım Adı", key: "sayim_adi", sortable: true },
   {
     header: "Başlangıç Tarihi",

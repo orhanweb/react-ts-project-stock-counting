@@ -13,7 +13,7 @@ const CustomLabel: React.FC<CustomLabelProps> = ({
   return (
     <label
       className={twMerge(
-        `text-gray-700 dark:text-gray-100 text-sm font-bold`,
+        `text-gray-700 dark:text-gray-100 text-sm font-semibold`,
         className
       )}
       {...props}

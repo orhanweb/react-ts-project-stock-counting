@@ -94,7 +94,7 @@ export interface CountFormData {
   endDate: string;
 }
 
-export interface CountList {
+export interface CountInterface {
   sayim_id: number;
   sayim_adi: string;
   tur: string;
@@ -104,4 +104,35 @@ export interface CountList {
   bitis: string;
   depo_name: string;
   durum: string; // can be 0, 1 or 2
+  depo_id: number;
+}
+
+export interface AddProductToCount {
+  sayim_id: number;
+  depos_id: number;
+  code: string; // ürün codu
+  inv_id: number; // ürün idsi
+  user_id: number;
+  stockData: Record<string, string>;
+}
+
+export interface Person {
+  person: { id: string; name: string };
+}
+
+export interface ViewCounted {
+  sayim_adi: string;
+  depos_adi: string;
+  sayilan_urunler: ViewCountedProducts[];
+}
+
+export interface ViewCountedProducts {
+  trans_id: number;
+  urun_code: string;
+  urun_adi: string;
+  unit: string; // adet, paket, koli,
+  unit_mult: string | number;
+  quantity: string; // ürünün stok miktarı
+  user_id: number;
+  date: string;
 }

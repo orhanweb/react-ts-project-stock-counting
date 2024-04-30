@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Dialog from "../../../../Components/CustomDialog";
 import CustomDatePicker from "../../../../Components/CustomDatePicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { CountList } from "../../../../Redux/Models/apiTypes";
+import { CountInterface } from "../../../../Redux/Models/apiTypes";
 import {
   formatDateV1,
   formatDateV2,
@@ -16,7 +16,7 @@ import Loader from "../../../../Components/Loader";
 interface DateUpdaterProps {
   isOpen: boolean;
   onClose: () => void;
-  item?: CountList;
+  item?: CountInterface;
 }
 
 const DateUpdater: React.FC<DateUpdaterProps> = ({ isOpen, onClose, item }) => {

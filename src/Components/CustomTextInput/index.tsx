@@ -1,17 +1,18 @@
 // Custom Text Input
 import React, { ChangeEvent } from "react";
 import { MdCancel } from "react-icons/md";
-import CustomLabel from "../CustomLabel";
+import CustomLabel from "../Labels/CustomLabel";
+import { twMerge } from "tailwind-merge";
 
 interface CustomTextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
-  label: string;
+  label?: string;
   value: string;
   placeholder: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  maxChars: number;
   isError?: boolean;
+  wrapperClassName?: string;
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = ({
@@ -19,9 +20,10 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   label,
   value,
   onChange,
-  maxChars,
   placeholder,
   isError = false,
+  className,
+  wrapperClassName,
   ...props
 }) => {
   const clearInput = () => {
@@ -34,24 +36,28 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   };
 
   return (
-    <div className="custom-text-input">
+    <div id="custom-text-input" className={wrapperClassName}>
       <div className="flex flex-row justify-between mb-2">
         <CustomLabel title={label} htmlFor={id} />
-        <div className="text-right text-xs font-mono mt-1 mr-2 cursor-default">
-          {value.length}/{maxChars}
-        </div>
+        {props.maxLength && (
+          <div className="text-right text-xs font-mono mt-1 mr-2 cursor-default">
+            {value.length}/{props.maxLength}
+          </div>
+        )}
       </div>
       <div className="relative">
         <input
-          maxLength={maxChars}
           id={id}
           placeholder={placeholder}
           type="text"
           value={value}
           onChange={onChange}
-          className={`${
-            isError ? "border-error" : ""
-          } border-2 bg-transparent border-background/50 p-2 rounded-lg w-full focus:border-primary focus:ring-0 text-text-darkest dark:text-text-lightest transition-colors duration-300`}
+          className={twMerge(
+            `${
+              isError ? "border-error" : ""
+            } border-2 bg-transparent border-background/50 p-2 rounded-lg w-full focus:border-primary focus:ring-0 text-text-darkest dark:text-text-lightest transition-colors duration-300`,
+            className
+          )}
           {...props}
         />
         {value && (

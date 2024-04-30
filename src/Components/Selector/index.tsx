@@ -1,7 +1,7 @@
 // Selector.tsx
 import React from "react";
 import { SelectorProps } from "./index.d";
-import CustomLabel from "../CustomLabel";
+import CustomLabel from "../Labels/CustomLabel";
 
 const Selector: React.FC<SelectorProps> = ({
   label = "Selector",

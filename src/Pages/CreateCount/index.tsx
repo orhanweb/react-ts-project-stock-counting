@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import CustomTextInput from "../../Components/CustomTextInput";
 import "react-datepicker/dist/react-datepicker.css";
 import Selector from "../../Components/Selector";
-import AutoComplete from "../../Components/AutoComplete";
-import { useQueryWrapper } from "../../Hooks/useQueryWrapper";
 import {
   useGetCountTypeQuery,
   useGetCountVariantsQuery,
@@ -11,7 +9,6 @@ import {
   useGetCountAreaQuery,
   useAddCountFormMutation,
 } from "../../Redux/Services/countFormAPI";
-import { StructureToCount } from "../../Redux/Models/apiTypes";
 import { useNotifications } from "../../Hooks/useNotifications";
 import { NotificationType } from "../../Components/Notification/index.d";
 import CustomDatePicker from "../../Components/CustomDatePicker";
@@ -20,28 +17,39 @@ import { LuClipboardEdit } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import Skeleton from "react-loading-skeleton";
 import { formatDateV1 } from "../../Utils/formatDateFuncs";
-import CustomLabel from "../../Components/CustomLabel";
+import AutoSelect from "../../Components/AutoSelect";
+import { FormData } from "./index.d";
+
+const initialFormData: FormData = {
+  countName: "",
+  startDate: null,
+  endDate: null,
+  countVariant: null,
+  countType: null,
+  countArea: null,
+  structureID: null,
+};
 
 const CreateCount: React.FC = () => {
   //Application hooks
   const { t } = useTranslation();
   const { addNotification } = useNotifications(); // Notification adding function
-
-  // States to be sent to the server
-  const [countName, setCountName] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [countVariant, setCountVariant] = useState<number | null>();
-  const [countType, setCountType] = useState<number | null>();
-  const [countArea, setCountArea] = useState<number | null>();
-  const [selectedStructure, setSelectedStructure] =
-    useState<StructureToCount | null>(null);
-
-  //States used in page management
+  // State to send to server
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  // --- States used in page management
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
+  const [isFocusedStructureSelect, setIsFocusedStructureSelect] =
+    useState<boolean>(false);
 
-  // Service uses
+  // --- SERVICES
   const [addCountForm, { isLoading }] = useAddCountFormMutation();
+  const {
+    data: structures,
+    isLoading: isLoadingStructure,
+    error: structuresError,
+  } = useGetStructuresToCountQuery(undefined, {
+    skip: !isFocusedStructureSelect,
+  });
   const {
     data: countVariants,
     isLoading: isLoadingCountVariants,
@@ -52,8 +60,8 @@ const CreateCount: React.FC = () => {
     isLoading: isLoadingCountTypes,
     error: countTypesError,
   } = useGetCountTypeQuery(
-    { variant: countVariant ?? 0 },
-    { skip: !countVariant }
+    { variant: formData.countVariant ?? 0 },
+    { skip: !formData.countVariant }
   );
   const {
     data: countAreas,
@@ -61,8 +69,13 @@ const CreateCount: React.FC = () => {
     error: countAreasError,
   } = useGetCountAreaQuery();
 
-  // Managing Errors
+  // --- MANAGING ERRORS
   useEffect(() => {
+    if (structuresError)
+      addNotification(
+        `Yapılar yüklenirken bir hata oluştu: ${structuresError}`,
+        NotificationType.Error
+      );
     if (countVariantsError)
       addNotification(
         `Sayım türleri yüklenirken bir hata oluştu: ${countVariantsError}`,
@@ -78,54 +91,53 @@ const CreateCount: React.FC = () => {
         `Sayım alanı yüklenirken bir hata oluştu: ${countAreasError}`,
         NotificationType.Error
       );
-  }, [countVariantsError, countTypesError, countAreasError]);
+  }, [structuresError, countVariantsError, countTypesError, countAreasError]);
 
-  // A function to select countVariant id by title
-  const handleSelectCountVariant = (selectedTitle: string) => {
-    const selectedVariant = countVariants?.find(
-      (variant) => variant.title === selectedTitle
-    );
-    if (selectedVariant) setCountVariant(selectedVariant.id);
-    // Reset Type when Count Variant changes
-    setCountType(null);
+  // --- PAGE FUNCTIONS
+  const updateFormData = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K]
+  ) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [field]: value,
+    }));
   };
 
-  // A function to select countType id by title
-  const handleSelectCountType = (selectedTitle: string) => {
-    const selectedType = countTypes?.find(
-      (type) => type.title === selectedTitle
-    );
-    if (selectedType) setCountType(selectedType.id);
+  // A function to selects
+  const handleSelect = (
+    selectedTitle: string,
+    fieldToUpdate: keyof FormData,
+    data?: any[]
+  ) => {
+    const selectedItem = data?.find((item) => item.title === selectedTitle);
+    if (selectedItem) {
+      updateFormData(fieldToUpdate, selectedItem.id);
+      // Reset Type when Count Variant changes
+      if (fieldToUpdate === "countVariant") {
+        updateFormData("countType", null);
+      }
+    }
   };
 
-  // A function to select countArea id by title
-  const handleSelectCountArea = (selectedTitle: string) => {
-    const selectedArea = countAreas?.find(
-      (area) => area.title === selectedTitle
-    );
-    if (selectedArea) setCountArea(selectedArea.id);
+  // A function to select structure
+  const handleSelectStructure = (selectedOption: any) => {
+    updateFormData("structureID", selectedOption ? selectedOption.value : null);
   };
 
-  // Find title value of selected option
-  const selectedVariant =
-    countVariants?.find((variant) => variant.id === countVariant)?.title || "";
-  const selectedType =
-    countTypes?.find((type) => type.id === countType)?.title || "";
-  const selectedArea =
-    countAreas?.find((area) => area.id === countArea)?.title || "";
+  const structureOptions = useMemo(() => {
+    return (
+      structures?.map((structure) => ({
+        value: structure.id,
+        label: structure.depo,
+      })) || []
+    );
+  }, [structures]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     // If any of the required states is empty, stop the process
-    if (
-      !countName ||
-      !startDate ||
-      !endDate ||
-      !selectedStructure ||
-      !countVariant ||
-      !countType ||
-      !countArea
-    ) {
+    if (Object.values(formData).some((value) => !value)) {
       setIsFormInvalid(true);
       addNotification(t("common.form-is-empty"), NotificationType.Error);
       return;
@@ -133,7 +145,10 @@ const CreateCount: React.FC = () => {
 
     // Past history check
     const now = new Date();
-    if ((startDate && startDate < now) || (endDate && endDate < now)) {
+    if (
+      (formData.startDate && formData.startDate < now) ||
+      (formData.endDate && formData.endDate < now)
+    ) {
       addNotification(
         t("create-count.invalid-date-warning-1"),
         NotificationType.Warning
@@ -142,7 +157,11 @@ const CreateCount: React.FC = () => {
     }
 
     // Check if end date is before start date
-    if (startDate && endDate && endDate < startDate) {
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      formData.endDate < formData.startDate
+    ) {
       addNotification(
         t("create-count.invalid-date-warning-2"),
         NotificationType.Warning
@@ -153,19 +172,19 @@ const CreateCount: React.FC = () => {
     setIsFormInvalid(false);
     try {
       await addCountForm({
-        name: countName,
-        title: countName,
-        fclass: countVariant,
-        ftype: countType,
+        name: formData.countName,
+        title: formData.countName,
+        fclass: formData.countVariant!,
+        ftype: formData.countType!,
         lock_items: 0, //Initially set to false
         user_id: 0, // Statically set to 0
         status: 0, // Initially set to false
         timeChanged: formatDateV1(new Date()),
         timeEntered: formatDateV1(new Date()),
-        depo_id: selectedStructure?.id,
-        site_id: countArea,
-        startDate: formatDateV1(startDate),
-        endDate: formatDateV1(endDate),
+        depo_id: formData.structureID!,
+        site_id: formData.countArea!,
+        startDate: formatDateV1(formData.startDate!),
+        endDate: formatDateV1(formData.endDate!),
       }).unwrap();
 
       addNotification(
@@ -173,13 +192,7 @@ const CreateCount: React.FC = () => {
         NotificationType.Success
       );
       // Reset form fields to their initial state
-      setCountName("");
-      setStartDate(null);
-      setEndDate(null);
-      setCountVariant(null);
-      setCountType(null);
-      setCountArea(null);
-      setSelectedStructure(null);
+      setFormData(initialFormData);
     } catch (error) {
       const err = error as { data?: { message?: string }; status?: number };
       const errorMessage = err.data?.message || t("create-count.unknown-error");
@@ -194,9 +207,12 @@ const CreateCount: React.FC = () => {
     {
       id: "count-variant",
       label: "Sayım Türü",
-      value: selectedVariant,
+      value:
+        countVariants?.find((variant) => variant.id === formData.countVariant)
+          ?.title || "",
       options: countVariants?.map((variant) => variant.title) || [],
-      onSelect: handleSelectCountVariant,
+      onSelect: (selectedTitle: string) =>
+        handleSelect(selectedTitle, "countVariant", countVariants),
       isLoading: isLoadingCountVariants,
       placeholder: "Tür Seçiniz",
       noDataText: "Türler Yüklenemedi.",
@@ -204,9 +220,11 @@ const CreateCount: React.FC = () => {
     {
       id: "count-type",
       label: "Sayım Tipi",
-      value: selectedType,
+      value:
+        countTypes?.find((type) => type.id === formData.countType)?.title || "",
       options: countTypes?.map((type) => type.title) || [],
-      onSelect: handleSelectCountType,
+      onSelect: (selectedTitle: string) =>
+        handleSelect(selectedTitle, "countType", countTypes),
       isLoading: isLoadingCountTypes,
       placeholder: "Tip Seçiniz",
       noDataText: "Tipler Yüklenemedi.",
@@ -214,9 +232,11 @@ const CreateCount: React.FC = () => {
     {
       id: "count-area",
       label: "Sayım Alanı",
-      value: selectedArea,
+      value:
+        countAreas?.find((area) => area.id === formData.countArea)?.title || "",
       options: countAreas?.map((area) => area.title) || [],
-      onSelect: handleSelectCountArea,
+      onSelect: (selectedTitle: string) =>
+        handleSelect(selectedTitle, "countArea", countAreas),
       isLoading: isLoadingCountAreas,
       placeholder: "Alan Seçiniz",
       noDataText: "Alanlar Yüklenemedi.",
@@ -230,34 +250,52 @@ const CreateCount: React.FC = () => {
       </h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Count name input field */}
-        <div className="sayim-adi">
-          <CustomTextInput
-            id="countName"
-            label="Sayım Adı:"
-            maxChars={50}
-            onChange={(e) => {
-              setCountName(e.target.value);
-            }}
-            placeholder="Yeni sayım adı girin..."
-            value={countName}
-            isError={!countName && isFormInvalid}
-          />
-        </div>
+        <CustomTextInput
+          id="countName"
+          label="Sayım Adı:"
+          maxLength={50}
+          onChange={(e) => {
+            updateFormData("countName", e.target.value);
+          }}
+          placeholder="Yeni sayım adı girin..."
+          value={formData.countName}
+          isError={!formData.countName && isFormInvalid}
+        />
         {/* Date Picker */}
-        <div className="sayim-tarih-araligi grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          id="count-date-range"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
           <CustomDatePicker
             label="Başlangıç Tarihi:"
-            selectedDate={startDate}
-            onChange={(date) => setStartDate(date ? date : null)}
+            selectedDate={formData.startDate}
+            onChange={(date) => updateFormData("startDate", date ? date : null)}
             placeholderText="Başlangıç tarihi ve saati seçin"
-            isError={!startDate && isFormInvalid}
+            isError={!formData.startDate && isFormInvalid}
           />
           <CustomDatePicker
             label="Bitiş Tarihi:"
-            selectedDate={endDate}
-            onChange={(date) => setEndDate(date ? date : null)}
+            selectedDate={formData.endDate}
+            onChange={(date) => updateFormData("endDate", date ? date : null)}
             placeholderText="Bitiş tarihi ve saati seçin"
-            isError={!endDate && isFormInvalid}
+            isError={!formData.endDate && isFormInvalid}
+          />
+        </div>
+        {/* Structure Selection */}
+        <div id="count-type-picker">
+          <AutoSelect
+            label="Sayılacak Yapı"
+            required
+            isClearable
+            options={structureOptions}
+            value={structureOptions.find(
+              (option) => option.value === formData.structureID
+            )}
+            onChange={handleSelectStructure}
+            placeholder="Yapı ara..."
+            isLoading={isLoadingStructure}
+            onFocus={() => setIsFocusedStructureSelect(true)}
+            onBlur={() => setIsFocusedStructureSelect(false)}
           />
         </div>
         {/* Count Variant, Type and Area Selection */}
@@ -299,19 +337,7 @@ const CreateCount: React.FC = () => {
             )}
           </div>
         ))}
-        <div id="count-type-picker">
-          <CustomLabel title={"Sayılacak Yapı:"} className="block mb-2" />
-          <AutoComplete
-            queryHook={(arg: any, skip: boolean) =>
-              useQueryWrapper(useGetStructuresToCountQuery, arg, skip)
-            }
-            formatLabel={(item: StructureToCount) => item.depo}
-            placeholder="Yapı ara..."
-            selectedSuggestion={selectedStructure}
-            onSelect={setSelectedStructure}
-            isError={!selectedStructure && isFormInvalid}
-          />
-        </div>
+
         <AsyncIconButton
           type="submit"
           isLoading={isLoading}

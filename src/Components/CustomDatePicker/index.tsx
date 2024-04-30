@@ -6,7 +6,7 @@ import DatePicker, {
 import "react-datepicker/dist/react-datepicker.css";
 import "./index.css";
 import tr from "date-fns/locale/tr"; // Required module for Turkish language support
-import CustomLabel from "../CustomLabel";
+import CustomLabel from "../Labels/CustomLabel";
 
 registerLocale("tr", tr); // Save Turkish
 

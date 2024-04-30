@@ -1,300 +1,386 @@
-import React, { useState, FormEvent, useEffect } from "react";
-import AutoComplete from "../../../Components/AutoComplete";
-import {
-  useGetCorridorsQuery,
-  useGetStructureQuery,
-  useGetSectionAndLevelQuery,
-} from "../../../Redux/Services/countLocationAPI";
-import {
-  Corridor,
-  Product,
-  SectionAndLevel,
-} from "../../../Redux/Models/apiTypes";
-import { AutoCompleteProps } from "../../../Components/AutoComplete/index.d";
-import AutoCompleteV2 from "../../../Components/AutoCompleteV2";
-import {
-  useGetProductNamesQuery,
-  useGetBarcodesQuery,
-} from "../../../Redux/Services/productsInfosAPI";
-import { MdSwapHoriz } from "react-icons/md";
-import { FaQrcode } from "react-icons/fa6";
-import BarcodeScanner from "../../../Components/BarcodeScanner";
-import { useQueryWrapper } from "../../../Hooks/useQueryWrapper";
-import { useNotifications } from "../../../Hooks/useNotifications";
-import { NotificationType } from "../../../Components/Notification/index.d";
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
+
 import AsyncIconButton from "../../../Components/Buttons/AsyncIconButton";
 import { IoIosAddCircle } from "react-icons/io";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { Navigate, useParams } from "react-router-dom";
 
-// Function that parses product unit types
-const getUnitTypes = (product: Product) => {
-  let units: string[] = [];
-  if (product.unit && !units.includes(product.unit)) units.push(product.unit);
-  if (product.unit2 && !units.includes(product.unit2))
-    units.push(product.unit2);
-  if (product.unit3 && !units.includes(product.unit3))
-    units.push(product.unit3);
-  return units;
+import Loader from "../../../Components/Loader";
+import Subtitle from "../../../Components/Labels/Subtitle";
+import { useTranslation } from "react-i18next";
+import { useNotifications } from "../../../Hooks/useNotifications";
+import { useGetCountDetailsQuery } from "../../../Redux/Services/countFormAPI";
+import { useAddProductToCountMutation } from "../../../Redux/Services/countFormAPI";
+import { NotificationType } from "../../../Components/Notification/index.d";
+import AutoSelect from "../../../Components/AutoSelect";
+import { AddProductToCount, Product } from "../../../Redux/Models/apiTypes";
+import {
+  useGetProductsByBarcodeQuery,
+  useGetProductsByCodeQuery,
+} from "../../../Redux/Services/productAPI";
+import { MdSwapHoriz } from "react-icons/md";
+import { debounce } from "lodash";
+import { useGetSessionQuery } from "../../../Redux/Services/sessionAPI";
+
+interface AddProductState {
+  redirectToNotFound: {
+    active: boolean;
+    message: string;
+  };
+  loadingStates: {
+    isLoading: boolean;
+    messages: string[];
+  };
+  selectedProduct: Product | null;
+  barcodeInput: string;
+  codeInput: string;
+  stockQuantities: Record<string, string>;
+  isShowBarcodeInput: boolean;
+}
+
+const initialState: AddProductState = {
+  redirectToNotFound: { active: false, message: "" },
+  loadingStates: { isLoading: false, messages: [] },
+  selectedProduct: null,
+  barcodeInput: "",
+  codeInput: "",
+  stockQuantities: {},
+  isShowBarcodeInput: true,
 };
 
 const AddProduct: React.FC = () => {
-  // Get the :countID value when the page is first opened
-  // Make a request, redirect the user to 404 or keep them on the page depending on the result.
-  // The selected structure type will come from the api, deselect the structure selection here
-  const { countID } = useParams<{ countID: string }>();
-  const { data: selectedStructure } = useGetStructureQuery({
-    countID: countID ?? "2",
-  });
   const { t } = useTranslation();
   const { addNotification } = useNotifications();
 
-  // States to be sent to the database
-  const [selectedCorridor, setSelectedCorridor] = useState<Corridor | null>(
-    null
-  );
-  const [selectedSectionLevel, setSelectedSectionLevel] =
-    useState<SectionAndLevel | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [unitValues, setUnitValues] = useState<Record<string, string>>({});
+  const { countID } = useParams<{ countID: string | undefined }>();
+  const [state, setState] = useState<AddProductState>(initialState);
+  const updateState = <K extends keyof AddProductState>(
+    key: K,
+    value: AddProductState[K]
+  ) => {
+    setState((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
 
-  // States used in page control
-  const [showScanner, setShowScanner] = useState<boolean>(false); // State for barcode reader visibility
-  const [barcodeValue, setBarcodeValue] = useState<string>("");
-  const [showBarcodeInput, setShowBarcodeInput] = useState<boolean>(true);
-  const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
-  const [ignoreReset, setIgnoreReset] = useState(false);
+  // If countID is not defined, redirect to NotFoundPage
+  if (!countID) {
+    updateState("redirectToNotFound", {
+      active: true,
+      message: "İstenen sayfa bulunamadı",
+    });
+    return;
+  }
+  const [addProduct, { isLoading: formIsLoading }] =
+    useAddProductToCountMutation();
 
-  // Update unitValues state when the selected product changes
+  const {
+    data: countDetails,
+    isLoading: countDetailIsLoading,
+    error: countDetailsError,
+  } = useGetCountDetailsQuery({ countID });
+
+  const {
+    data: sessionData,
+    isLoading: isLoadingSession,
+    error: errorSession,
+  } = useGetSessionQuery();
+
   useEffect(() => {
-    const initialUnitValues: Record<string, string> = {};
-    if (selectedProduct) {
-      getUnitTypes(selectedProduct).forEach((unitType) => {
-        initialUnitValues[unitType] = "";
+    console.log(sessionData), [sessionData];
+  });
+  const {
+    data: productsData,
+    isFetching: productsIsLoading,
+    error: productsError,
+  } = useGetProductsByBarcodeQuery(
+    { barcode: state.barcodeInput },
+    { skip: state.barcodeInput.length < 3 }
+  );
+
+  const {
+    data: productsDataForCode,
+    isFetching: productsIsLoadingForCode,
+    error: productsErrorForCode,
+  } = useGetProductsByCodeQuery(
+    { code: state.codeInput },
+    { skip: state.codeInput.length < 3 }
+  );
+
+  // --- MANAGING ERRORS
+  useEffect(() => {
+    if (countDetailsError)
+      addNotification(
+        `Bir hata oluştu: ${countDetailsError}`,
+        NotificationType.Error
+      );
+    if (errorSession)
+      addNotification(
+        `Bir hata oluştu: ${errorSession}`,
+        NotificationType.Error
+      );
+    if (productsError)
+      addNotification(
+        `Ürünler Yüklenirken Bir Hata Oluştu: ${productsError}`,
+        NotificationType.Error
+      );
+    if (productsErrorForCode)
+      addNotification(
+        `Ürünler Yüklenirken Bir Hata Oluştu: ${productsErrorForCode}`,
+        NotificationType.Error
+      );
+  }, [countDetailsError, errorSession, productsError, productsErrorForCode]);
+
+  useEffect(() => {
+    // If countDetails is undefined, redirect the user to a 404 page
+    if (!countDetailIsLoading && !countDetails) {
+      updateState("redirectToNotFound", {
+        active: true,
+        message: "İlgili sayım bulunamadı veya getirilemedi.",
+      });
+      return;
+    }
+
+    // Inform and guide the user if the count is completed
+    if (countDetails && countDetails.durum === "2") {
+      addNotification("Bu sayım tamamlanmış", NotificationType.Info);
+      updateState("redirectToNotFound", {
+        active: true,
+        message: "Sayım tamamlanmış ve bu sayfa artık geçerli değil.",
       });
     }
-    setUnitValues(initialUnitValues);
-  }, [selectedProduct]);
+  }, [countDetails, countDetailIsLoading]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // --- MANAGING LOADERS
+  useEffect(() => {
+    const messages: string[] = [];
+    if (countDetailIsLoading) messages.push("Sayım bilgileri güncelleniyor...");
+    if (isLoadingSession) messages.push("Session bilgileri sorgulanıyor...");
+
+    // Show messages at the same time, whichever loading states are active
+    updateState("loadingStates", {
+      isLoading: countDetailIsLoading || isLoadingSession,
+      messages,
+    });
+  }, [countDetailIsLoading, isLoadingSession]);
+
+  // --- USEEFFECT for update stock quantities
+  useEffect(() => {
+    const newStockQuantities: Record<string, string> = {};
+    if (state.selectedProduct) {
+      // Ürün değiştiğinde stok miktarlarını sıfırla
+      if (state.selectedProduct.unit)
+        newStockQuantities[state.selectedProduct.unit] = "";
+      if (state.selectedProduct.unit2)
+        newStockQuantities[state.selectedProduct.unit2] = "";
+      if (state.selectedProduct.unit3)
+        newStockQuantities[state.selectedProduct.unit3] = "";
+    }
+    updateState("stockQuantities", newStockQuantities); // Eğer seçili ürün yoksa listeyi direkt boşaltır.
+  }, [state.selectedProduct]);
+
+  // --- FUNCTIONS
+  const productOptions = useMemo(() => {
+    return (
+      productsData?.map((product) => ({
+        value: product.id,
+        label: `${product.name} Barkod: ${product.barcode1}`,
+      })) || []
+    );
+  }, [productsData]);
+
+  const productOptionsForCode = useMemo(() => {
+    return (
+      productsDataForCode?.map((product) => ({
+        value: product.id,
+        label: `${product.name} [Kod: ${product.code}]`,
+      })) || []
+    );
+  }, [productsDataForCode]);
+
+  const toggleInputType = () => {
+    updateState("selectedProduct", null);
+    updateState("barcodeInput", "");
+    updateState("codeInput", "");
+
+    updateState("isShowBarcodeInput", !state.isShowBarcodeInput);
+  };
+
+  const debouncedUpdateBarcode = debounce((value) => {
+    updateState("barcodeInput", value);
+  }, 500);
+
+  const debouncedUpdateCode = debounce((value) => {
+    updateState("codeInput", value);
+  }, 500);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // If any of the required states is empty, stop the process
-    if (
-      !selectedStructure ||
-      !selectedCorridor ||
-      !selectedSectionLevel ||
-      !selectedProduct
-    ) {
-      setIsFormInvalid(true); // Form is invalid, update error state
+    // selectedWorker ve selectedProduct kontrolü
+    if (!countDetails || !sessionData?.id || !state.selectedProduct) {
       addNotification(t("common.form-is-empty"), NotificationType.Error);
       return;
     }
-    setIsFormInvalid(false);
-    // Process form data if all required fields are filled
-    const formData = {
-      structureID: selectedStructure.id,
-      corridorId: selectedCorridor.id,
-      sectionLevelId: selectedSectionLevel.id,
-      productId: selectedProduct.id,
-      stockData: unitValues,
+
+    const filteredStockData = Object.entries(state.stockQuantities).reduce<
+      Record<string, string>
+    >((acc, [key, value]) => {
+      if (value) acc[key] = value;
+      return acc;
+    }, {});
+
+    // Form verisini oluştur
+    const formData: AddProductToCount = {
+      sayim_id: countDetails.sayim_id,
+      depos_id: countDetails.depo_id,
+      code: state.selectedProduct.code, // product code
+      inv_id: state.selectedProduct.id, // product value
+      user_id: parseInt(sessionData.id.toString()),
+      stockData: filteredStockData,
     };
 
-    console.log("Form Data:", formData);
-    addNotification(t("add-product.added-product"), NotificationType.Success);
-    // Here I will send formData to the API.
-    setSelectedProduct(null);
+    try {
+      await addProduct(formData).unwrap();
+      addNotification(t("add-product.added-product"), NotificationType.Success);
+      // Reset product for next adding
+      updateState("selectedProduct", null);
+    } catch (error) {
+      const err = error as { data?: { message?: string }; status?: number };
+      const errorMessage = err.data?.message || "Bilinmeyen Hata";
+      addNotification(`Hata oluştu ${errorMessage}`, NotificationType.Error);
+    }
   };
-
-  // Function to choose between entering Product Name or Barcode
-  const toggleInputType = () => {
-    setSelectedProduct(null);
-    setShowBarcodeInput(!showBarcodeInput);
-  };
-
-  // Function that updates input fields
-  const handleUnitChange = (unitType: string, value: string) => {
-    setUnitValues({ ...unitValues, [unitType]: value });
-  };
-
-  // Function running if barcode is scanned
-  const handleBarcodeScanned = (scannedBarcode: string) => {
-    setIgnoreReset(true);
-    setSelectedProduct(null);
-    setBarcodeValue(scannedBarcode);
-
-    // ignoreReset becomes false on the next render cycle
-    setTimeout(() => {
-      setBarcodeValue("");
-      setIgnoreReset(false);
-    }, 600);
-  };
-
-  // LOCATION AUTO COMPLETE COMPONENTS VARIABLES
-  const autoCompleteFields: AutoCompleteProps[] = [
-    {
-      queryHook: (arg: any, skip: boolean) =>
-        useQueryWrapper(useGetCorridorsQuery, { structureID: arg }, skip),
-      formatLabel: (item: Corridor) => item.name,
-      placeholder: t("add-product.search-area"),
-      selectedSuggestion: selectedCorridor,
-      onSelect: setSelectedCorridor,
-      queryArg: 2, // I gave the current static value, update it later selectedStructure?.id,
-      isError: isFormInvalid && !selectedCorridor,
-    },
-    {
-      queryHook: (arg: any, skip: boolean) =>
-        useQueryWrapper(
-          useGetSectionAndLevelQuery,
-          { zoneId: arg },
-          skip || !selectedCorridor
-        ),
-      formatLabel: (item: SectionAndLevel) =>
-        t("add-product.dynamic-region-and-floor-autocomplate", {
-          region: item.name,
-          floor: item.floor,
-        }),
-      placeholder: t("add-product.search-region-and-floor"),
-      selectedSuggestion: selectedSectionLevel,
-      onSelect: setSelectedSectionLevel,
-      queryArg: selectedCorridor?.id,
-      disabled: !selectedCorridor,
-      isError: isFormInvalid && !selectedSectionLevel,
-    },
-  ];
 
   return (
     <div id="add-product-page" className="w-full lg:w-3/4 mx-auto">
-      <h1 className="text-center text-2xl md:text-3xl lg:text-4xl mt-8 mb-4">
+      {state.redirectToNotFound.active && (
+        <Navigate
+          to="/not-found"
+          replace
+          state={{ message: state.redirectToNotFound.message }}
+        />
+      )}
+      <Loader
+        isLoading={state.loadingStates.isLoading}
+        messages={state.loadingStates.messages}
+      />
+      <h1 className="text-xl font-bold md:text-2xl lg:text-3xl mt-10 mb-4">
         {t("add-product.page-title")}
       </h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <h2 className="text-center text-xl md:text-2xl lg:text-3xl">
-          {t("add-product.sub-title-1")}
-        </h2>
-        <p>{selectedStructure?.depo}</p>{" "}
-        {/*Update this part, the build type should also be printed*/}
-        <div
-          id="picking-location"
-          className=" flex flex-col lg:flex-row w-full items-center justify-center gap-4"
-        >
-          {autoCompleteFields.map((field, index) => (
-            <AutoComplete
-              key={index}
-              queryHook={field.queryHook}
-              formatLabel={field.formatLabel}
-              placeholder={field.placeholder}
-              selectedSuggestion={field.selectedSuggestion}
-              onSelect={field.onSelect}
-              queryArg={field.queryArg}
-              disabled={field.disabled}
-              isError={field.isError}
-            />
-          ))}
+        <Subtitle text="Sayım Detayları" />
+        <div id="count-details" className="space-y-2">
+          <ul className="list-disc list-inside space-y-2">
+            <li>
+              Sayım adı:{" "}
+              {countDetails ? countDetails.sayim_adi : "Yükleniyor..."}
+            </li>
+            <li>
+              Saydığınız Yapı:{" "}
+              {countDetails ? countDetails.depo_name : "Yükleniyor..."}
+            </li>
+            <li>
+              Sayan Kişi:{" "}
+              {sessionData?.name ? sessionData.name : "Yükleniyor..."}
+            </li>
+          </ul>
         </div>
-        <h2 className="text-center text-xl md:text-2xl lg:text-3xl">
-          {t("add-product.sub-title-2")}
-        </h2>
-        <div
-          id="picking-product"
-          className="flex flex-row items-center justify-center gap-2 w-full"
-        >
-          <AsyncIconButton
-            Icon={MdSwapHoriz}
-            type="button"
-            onClick={toggleInputType}
-            className="min-w-fit px-2 py-2"
-          />
-          {showBarcodeInput ? (
-            <div className="flex items-center w-full gap-2">
-              <AutoCompleteV2
-                key={"barcode"}
-                queryHook={(arg: any, skip: boolean) =>
-                  useQueryWrapper(
-                    useGetBarcodesQuery,
-                    { barcode: arg },
-                    skip || !arg
-                  )
-                }
-                formatLabel={(item: Product) =>
-                  t("add-product.dynamic-barcode-autocomplate", {
-                    product: item.name,
-                    barcode: item.barcode1,
-                  })
-                }
-                formatInputValue={(item: Product) => item.barcode1}
-                onSelect={setSelectedProduct}
-                selectedSuggestion={selectedProduct}
-                placeholder={t("add-product.search-barcode")}
-                isError={isFormInvalid && !selectedProduct}
-                externalInputValue={barcodeValue}
-                ignoreResetOnSelectedSuggestionNull={ignoreReset}
-              />
-              <button
-                type="button"
-                onClick={() => setShowScanner(true)}
-                className="p-2 text-xl bg-background-light text-text-darkest dark:bg-background-darkest dark:text-text-lightest rounded-lg hover:text-primary hover:dark:text-primary transition-colors duration-300 ease-in-out"
-              >
-                <FaQrcode />
-              </button>
-            </div>
-          ) : (
-            <AutoCompleteV2
-              key={"productNameOrCode"}
-              queryHook={(arg: any, skip: boolean) =>
-                useQueryWrapper(
-                  useGetProductNamesQuery,
-                  { productName: arg },
-                  skip || !arg
+
+        <div className="flex flex-col gap-1">
+          <div className="flex gap-2 items-baseline justify-between">
+            <Subtitle text="Ürün Seç" />
+            <AsyncIconButton
+              Icon={MdSwapHoriz}
+              type="button"
+              onClick={toggleInputType}
+              className="min-w-fit"
+            />
+          </div>
+
+          {state.isShowBarcodeInput ? (
+            <AutoSelect
+              id="product-barcode-selector"
+              placeholder="Ürün barkodu..."
+              isClearable
+              required
+              noOptionsMessage={() => "Minimum 3 karakter"}
+              value={
+                state.selectedProduct
+                  ? productOptions.find(
+                      (option) => option.value === state.selectedProduct?.id
+                    )
+                  : null
+              }
+              onInputChange={(inputValue) => debouncedUpdateBarcode(inputValue)}
+              options={productOptions}
+              isLoading={productsIsLoading}
+              onChange={(option: any) =>
+                updateState(
+                  "selectedProduct",
+                  productsData?.find(
+                    (product) => product.id === option?.value
+                  ) || null
                 )
               }
-              formatLabel={(item: Product) =>
-                t("add-product.dynamic-product-autocomplate", {
-                  product: item.name,
-                  code: item.code,
-                })
+            />
+          ) : (
+            <AutoSelect
+              id="product-code-selector"
+              placeholder="Ürün kodu veya adı..."
+              isClearable
+              required
+              noOptionsMessage={() => "Minimum 3 karakter"}
+              value={
+                state.selectedProduct
+                  ? productOptionsForCode.find(
+                      (option) => option.value === state.selectedProduct?.id
+                    )
+                  : null
+              } // Seçilen ürünü göster
+              onInputChange={(inputValue) => debouncedUpdateCode(inputValue)}
+              options={productOptionsForCode}
+              isLoading={productsIsLoadingForCode}
+              onChange={(option: any) =>
+                updateState(
+                  "selectedProduct",
+                  productsDataForCode?.find(
+                    (product) => product.id === option?.value
+                  ) || null
+                )
               }
-              formatInputValue={(item: Product) => item.name}
-              onSelect={setSelectedProduct}
-              selectedSuggestion={selectedProduct}
-              placeholder={t("add-product.search-product")}
-              isError={isFormInvalid && !selectedProduct}
             />
           )}
         </div>
-        <h2 className="text-center text-xl md:text-2xl lg:text-3xl">
-          {t("add-product.sub-title-3")}
-        </h2>
+        <Subtitle text={t("add-product.sub-title-3")} />
         <div id="entering-stock" className="w-full">
-          {selectedProduct ? (
+          {state.selectedProduct ? (
             <div className="flex flex-col lg:flex-row w-full items-center justify-center gap-4">
-              {Object.keys(unitValues).map((unitType) => (
+              {Object.keys(state.stockQuantities).map((unitType) => (
                 <input
                   key={unitType}
+                  id={unitType}
+                  min={0}
                   type="number"
                   placeholder={t("add-product.dynamic-unit", { unitType })}
                   className="w-full border rounded-lg p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out"
-                  id={unitType}
-                  value={unitValues[unitType]}
-                  onChange={(e) => handleUnitChange(unitType, e.target.value)}
+                  value={state.stockQuantities[unitType]}
+                  onChange={(e) =>
+                    updateState("stockQuantities", {
+                      ...state.stockQuantities,
+                      [unitType]: e.target.value,
+                    })
+                  }
                 />
               ))}
             </div>
           ) : (
-            <p className="text-center text-text-light">
-              {t("add-product.warning-unit")}
-            </p>
+            <p className="text-text-light">{t("add-product.warning-unit")}</p>
           )}
         </div>
-        {/* Barkod Scanner Component*/}
-        {showScanner && (
-          <BarcodeScanner
-            onClose={() => setShowScanner(false)}
-            onBarcodeScanned={handleBarcodeScanned}
-          />
-        )}
         <AsyncIconButton
           type="submit"
+          isLoading={formIsLoading}
           title={t("add-product.add-count")}
           Icon={IoIosAddCircle}
         />

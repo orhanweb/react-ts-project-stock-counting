@@ -1,7 +1,7 @@
 import React from "react";
 import Dialog from "../../../../Components/CustomDialog";
 import "react-datepicker/dist/react-datepicker.css";
-import { CountList } from "../../../../Redux/Models/apiTypes";
+import { CountInterface } from "../../../../Redux/Models/apiTypes";
 import { useLockCountMutation } from "../../../../Redux/Services/countFormAPI";
 import { useNotifications } from "../../../../Hooks/useNotifications";
 import { NotificationType } from "../../../../Components/Notification/index.d";
@@ -11,7 +11,7 @@ import { DialogType } from "../../../../Components/CustomDialog/index.d";
 interface DeleteAItemProps {
   isOpen: boolean;
   onClose: () => void;
-  item?: CountList;
+  item?: CountInterface;
 }
 
 const DeleteAItem: React.FC<DeleteAItemProps> = ({ isOpen, onClose, item }) => {
