@@ -52,7 +52,7 @@ const ViewCounts: React.FC = () => {
 
   //--- MANAGING RESPONSIVE
   useEffect(() => {
-    const handleResize = () => setIsMobileView(window.innerWidth < 1160);
+    const handleResize = () => setIsMobileView(window.innerWidth < 1200);
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);

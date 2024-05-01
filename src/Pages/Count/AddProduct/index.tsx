@@ -86,9 +86,6 @@ const AddProduct: React.FC = () => {
     error: errorSession,
   } = useGetSessionQuery();
 
-  useEffect(() => {
-    console.log(sessionData), [sessionData];
-  });
   const {
     data: productsData,
     isFetching: productsIsLoading,
@@ -362,6 +359,7 @@ const AddProduct: React.FC = () => {
                   id={unitType}
                   min={0}
                   type="number"
+                  step="0.0001"
                   placeholder={t("add-product.dynamic-unit", { unitType })}
                   className="w-full border rounded-lg p-2 border-background bg-transparent text-text-darkest dark:text-text-lightest focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-300 ease-in-out"
                   value={state.stockQuantities[unitType]}

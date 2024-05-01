@@ -59,10 +59,6 @@ const ViewCounted: React.FC = () => {
     error: workersError,
   } = useGetWorkersQuery();
 
-  useEffect(() => {
-    console.log("Gelen ürün verileri", countedProducts);
-  }, [countedProducts]);
-
   //--- MANAGING RESPONSIVE
   useEffect(() => {
     const handleResize = () =>
