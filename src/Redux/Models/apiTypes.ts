@@ -123,6 +123,10 @@ export interface Person {
 export interface ViewCounted {
   sayim_adi: string;
   depos_adi: string;
+  urun_cesidi: number;
+  personel_sayisi: number;
+  ilk_sayim_saati: string;
+  son_sayim_saati: string;
   sayilan_urunler: ViewCountedProducts[];
 }
 

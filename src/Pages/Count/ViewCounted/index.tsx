@@ -15,6 +15,7 @@ import GenericCardList from "../../../Components/GenericCardList";
 import GenericTable from "../../../Components/GenericTable";
 import { useGetWorkersQuery } from "../../../Redux/Services/userAPI";
 import { MdDelete } from "react-icons/md";
+import AccordionCard from "../../../Components/AccordionCard";
 
 interface ViewCountedState {
   loadingStates: {
@@ -22,10 +23,12 @@ interface ViewCountedState {
     messages: string[];
   };
   isMobileView: boolean;
+  isCardOpen: boolean;
 }
 const initialState: ViewCountedState = {
   loadingStates: { isLoading: false, messages: [] },
   isMobileView: window.innerWidth < 1160,
+  isCardOpen: false,
 };
 
 const ViewCounted: React.FC = () => {
@@ -155,13 +158,40 @@ const ViewCounted: React.FC = () => {
       <h1 className="text-xl font-bold md:text-2xl lg:text-3xl mt-10 mb-4">
         Sayılan Ürünler
       </h1>
-      {/* Sayım adı ve depo adını görüntüleyelim */}
-      <h2 className="text-lg lg:text-xl mb-4">
-        {countedProducts?.sayim_adi || "Yükleniyor..."} -{" "}
-        <span className="font-bold text-base opacity-40">
-          {countedProducts?.depos_adi}
-        </span>
-      </h2>
+
+      <div className="mb-4 ">
+        <AccordionCard
+          title={`Sayım Detayları ${!countedProducts ? "- Yükleniyor.." : ""}`}
+          isOpen={state.isCardOpen}
+          onClick={() => updateState("isCardOpen", !state.isCardOpen)}
+        >
+          <span className="block">
+            Sayımın adı: <strong>{countedProducts?.sayim_adi}</strong>
+          </span>
+          <span className="block">
+            Sayılan Yapı: <strong>{countedProducts?.depos_adi}</strong>
+          </span>
+          <span className="block">
+            Ürün Çeşidi: <strong>{countedProducts?.urun_cesidi}</strong>
+          </span>
+          <span className="block">
+            Personel Sayısı: <strong>{countedProducts?.personel_sayisi}</strong>
+          </span>
+          <span className="block">
+            İlk ürün saati:{" "}
+            <strong>
+              {formatDateV2(countedProducts?.ilk_sayim_saati ?? "")}
+            </strong>
+          </span>
+          <span className="block">
+            Son ürün saati:{" "}
+            <strong>
+              {formatDateV2(countedProducts?.son_sayim_saati ?? "")}
+            </strong>
+          </span>
+        </AccordionCard>
+      </div>
+
       {state.isMobileView ? (
         <GenericCardList
           data={countedProducts?.sayilan_urunler || []}
