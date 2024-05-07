@@ -1,6 +1,6 @@
 // Determining Notification type
 export interface NotificationProps {
-  id: number;
+  id: string;
   message: string;
   type: NotificationType;
 }

@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import React, { FormEvent, useEffect, useMemo } from "react";
 
 import AsyncIconButton from "../../../Components/Buttons/AsyncIconButton";
 import { IoIosAddCircle } from "react-icons/io";
@@ -20,15 +20,14 @@ import {
 import { MdSwapHoriz } from "react-icons/md";
 import { debounce } from "lodash";
 import { useGetSessionQuery } from "../../../Redux/Services/sessionAPI";
+import { useStateManager } from "../../../Hooks/useStateManager";
+import { useErrorManager } from "../../../Hooks/useErrorManager";
+import { useLoadingManager } from "../../../Hooks/useLoadingManager";
 
 interface AddProductState {
   redirectToNotFound: {
     active: boolean;
     message: string;
-  };
-  loadingStates: {
-    isLoading: boolean;
-    messages: string[];
   };
   selectedProduct: Product | null;
   barcodeInput: string;
@@ -39,7 +38,6 @@ interface AddProductState {
 
 const initialState: AddProductState = {
   redirectToNotFound: { active: false, message: "" },
-  loadingStates: { isLoading: false, messages: [] },
   selectedProduct: null,
   barcodeInput: "",
   codeInput: "",
@@ -52,16 +50,7 @@ const AddProduct: React.FC = () => {
   const { addNotification } = useNotifications();
 
   const { countID } = useParams<{ countID: string | undefined }>();
-  const [state, setState] = useState<AddProductState>(initialState);
-  const updateState = <K extends keyof AddProductState>(
-    key: K,
-    value: AddProductState[K]
-  ) => {
-    setState((prevState) => ({
-      ...prevState,
-      [key]: value,
-    }));
-  };
+  const { state, updateState } = useStateManager<AddProductState>(initialState);
 
   // If countID is not defined, redirect to NotFoundPage
   if (!countID) {
@@ -76,20 +65,20 @@ const AddProduct: React.FC = () => {
 
   const {
     data: countDetails,
-    isLoading: countDetailIsLoading,
-    error: countDetailsError,
+    isLoading: isLCountDetails,
+    error: eCountDetails,
   } = useGetCountDetailsQuery({ countID });
 
   const {
     data: sessionData,
-    isLoading: isLoadingSession,
-    error: errorSession,
+    isLoading: isLSession,
+    error: eSession,
   } = useGetSessionQuery();
 
   const {
     data: productsData,
-    isFetching: productsIsLoading,
-    error: productsError,
+    isFetching: isLProducts,
+    error: eProducts,
   } = useGetProductsByBarcodeQuery(
     { barcode: state.barcodeInput },
     { skip: state.barcodeInput.length < 3 }
@@ -97,40 +86,28 @@ const AddProduct: React.FC = () => {
 
   const {
     data: productsDataForCode,
-    isFetching: productsIsLoadingForCode,
-    error: productsErrorForCode,
+    isFetching: isLProductsForCode,
+    error: eProductsForCode,
   } = useGetProductsByCodeQuery(
     { code: state.codeInput },
     { skip: state.codeInput.length < 3 }
   );
 
   // --- MANAGING ERRORS
-  useEffect(() => {
-    if (countDetailsError)
-      addNotification(
-        `Bir hata oluştu: ${countDetailsError}`,
-        NotificationType.Error
-      );
-    if (errorSession)
-      addNotification(
-        `Bir hata oluştu: ${errorSession}`,
-        NotificationType.Error
-      );
-    if (productsError)
-      addNotification(
-        `Ürünler Yüklenirken Bir Hata Oluştu: ${productsError}`,
-        NotificationType.Error
-      );
-    if (productsErrorForCode)
-      addNotification(
-        `Ürünler Yüklenirken Bir Hata Oluştu: ${productsErrorForCode}`,
-        NotificationType.Error
-      );
-  }, [countDetailsError, errorSession, productsError, productsErrorForCode]);
+  useErrorManager([
+    { error: eCountDetails, message: "Bir hata oluştu" },
+    { error: eSession, message: "Kullanıcı çekilemedi" },
+    { error: eProducts, message: "Ürünler Yüklenirken Bir Hata Oluştu" },
+    { error: eProductsForCode, message: "Ürünler Yüklenirken Bir Hata Oluştu" },
+    {
+      error: eCountDetails,
+      message: "Sayım verileri yüklenirken bir hata oluştu",
+    },
+  ]);
 
   useEffect(() => {
     // If countDetails is undefined, redirect the user to a 404 page
-    if (!countDetailIsLoading && !countDetails) {
+    if (!isLCountDetails && !countDetails) {
       updateState("redirectToNotFound", {
         active: true,
         message: "İlgili sayım bulunamadı veya getirilemedi.",
@@ -146,20 +123,13 @@ const AddProduct: React.FC = () => {
         message: "Sayım tamamlanmış ve bu sayfa artık geçerli değil.",
       });
     }
-  }, [countDetails, countDetailIsLoading]);
+  }, [countDetails, isLCountDetails]);
 
   // --- MANAGING LOADERS
-  useEffect(() => {
-    const messages: string[] = [];
-    if (countDetailIsLoading) messages.push("Sayım bilgileri güncelleniyor...");
-    if (isLoadingSession) messages.push("Session bilgileri sorgulanıyor...");
-
-    // Show messages at the same time, whichever loading states are active
-    updateState("loadingStates", {
-      isLoading: countDetailIsLoading || isLoadingSession,
-      messages,
-    });
-  }, [countDetailIsLoading, isLoadingSession]);
+  const loadingStates = useLoadingManager([
+    { isLoading: isLCountDetails, message: "Sayım bilgileri güncelleniyor..." },
+    { isLoading: isLSession, message: "Session bilgileri sorgulanıyor..." },
+  ]);
 
   // --- USEEFFECT for update stock quantities
   useEffect(() => {
@@ -259,8 +229,8 @@ const AddProduct: React.FC = () => {
         />
       )}
       <Loader
-        isLoading={state.loadingStates.isLoading}
-        messages={state.loadingStates.messages}
+        isLoading={loadingStates.isLoading}
+        messages={loadingStates.messages}
       />
       <h1 className="text-xl font-bold md:text-2xl lg:text-3xl mt-10 mb-4">
         {t("add-product.page-title")}
@@ -311,7 +281,7 @@ const AddProduct: React.FC = () => {
               }
               onInputChange={(inputValue) => debouncedUpdateBarcode(inputValue)}
               options={productOptions}
-              isLoading={productsIsLoading}
+              isLoading={isLProducts}
               onChange={(option: any) =>
                 updateState(
                   "selectedProduct",
@@ -337,7 +307,7 @@ const AddProduct: React.FC = () => {
               } // Seçilen ürünü göster
               onInputChange={(inputValue) => debouncedUpdateCode(inputValue)}
               options={productOptionsForCode}
-              isLoading={productsIsLoadingForCode}
+              isLoading={isLProductsForCode}
               onChange={(option: any) =>
                 updateState(
                   "selectedProduct",

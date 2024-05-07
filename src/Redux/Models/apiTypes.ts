@@ -135,8 +135,18 @@ export interface ViewCountedProducts {
   urun_code: string;
   urun_adi: string;
   unit: string; // adet, paket, koli,
-  unit_mult: string | number;
   quantity: string; // ürünün stok miktarı
   user_id: number;
+  time: string;
+  date: string;
+}
+
+export interface CountedExcel {
+  urun: string;
+  farkli_sayim_noktasi: number;
+  toplam_miktar: string;
+  ana_birim: string;
+  birim_fiyat: string;
+  tutar: string;
   date: string;
 }

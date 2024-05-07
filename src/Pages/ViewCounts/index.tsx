@@ -20,6 +20,8 @@ import { TbExternalLink, TbPlayerStopFilled } from "react-icons/tb";
 import { IoCalendar } from "react-icons/io5";
 import { FaPlay } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
+import { useLoadingManager } from "../../Hooks/useLoadingManager";
+import { useErrorManager } from "../../Hooks/useErrorManager";
 
 // An object to control dialog states
 const initialDialogState = {
@@ -31,10 +33,6 @@ const ViewCounts: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1160);
-  const [loadingStates, setLoadingStates] = useState<{
-    isLoading: boolean;
-    messages: string[];
-  }>({ isLoading: false, messages: [] });
   const [dialogState, setDialogState] = useState(initialDialogState);
   const [selectedItemForDialogs, setSelectedItemForDialogs] = useState<
     CountInterface | undefined
@@ -42,13 +40,12 @@ const ViewCounts: React.FC = () => {
 
   // --- SERVICES
   const {
-    data: counts,
-    isLoading: isGetCountsLoading,
-    error: countListError,
+    data: countList,
+    isLoading: isLCountList,
+    error: eCountList,
   } = useGetCountListQuery();
-  const [startCount, { isLoading: isStartCountLoading }] =
-    useStartCountMutation();
-  const [endCount, { isLoading: isEndCountLoading }] = useEndCountMutation();
+  const [startCount, { isLoading: isLStartCount }] = useStartCountMutation();
+  const [endCount, { isLoading: isLEndCount }] = useEndCountMutation();
 
   //--- MANAGING RESPONSIVE
   useEffect(() => {
@@ -60,26 +57,19 @@ const ViewCounts: React.FC = () => {
   }, []);
 
   // --- MANAGINC ERRORS
-  useEffect(() => {
-    if (countListError)
-      addNotification(
-        `Sayım listesi yüklenirken bir hata oluştu: ${countListError}`,
-        NotificationType.Error
-      );
-  }, [countListError]);
+  useErrorManager([
+    {
+      error: eCountList,
+      message: "Sayım listesi yüklenirken bir hata oluştu",
+    },
+  ]);
 
   // --- MANAGING LOADERS
-  useEffect(() => {
-    const messages: string[] = [];
-    if (isGetCountsLoading) messages.push("Sayım listesi yükleniyor...");
-    if (isStartCountLoading) messages.push("Sayım başlatılıyor...");
-    if (isEndCountLoading) messages.push("Sayım bitiriliyor...");
-    // Show messages at the same time, whichever loading states are active
-    setLoadingStates({
-      isLoading: isGetCountsLoading || isStartCountLoading || isEndCountLoading,
-      messages,
-    });
-  }, [isGetCountsLoading, isStartCountLoading, isEndCountLoading]);
+  const loadingStates = useLoadingManager([
+    { isLoading: isLCountList, message: "Sayım listesi yükleniyor..." },
+    { isLoading: isLStartCount, message: "Sayım başlatılıyor..." },
+    { isLoading: isLEndCount, message: "Sayım bitiriliyor..." },
+  ]);
 
   // --- DIALOG FUNCTIONS
   const openDateUpdater = (item: CountInterface) => {
@@ -102,6 +92,15 @@ const ViewCounts: React.FC = () => {
             Icon: TbExternalLink,
             label: "Sayıma Git",
             onClick: () => navigate(`/count/${item.sayim_id}/addProduct`),
+          },
+        ]
+      : []),
+    ...(item.durum === "1" || item.durum === "2"
+      ? [
+          {
+            Icon: TbExternalLink,
+            label: "Sayılanları Göster",
+            onClick: () => navigate(`/count/${item.sayim_id}/view-counted`),
           },
         ]
       : []),
@@ -169,12 +168,16 @@ const ViewCounts: React.FC = () => {
           },
         ]
       : []),
-    {
-      Icon: MdDelete,
-      label: "Sil",
-      onClick: () => openDeleteConfirmation(item),
-      dangerEffect: true,
-    },
+    ...(item.durum === "0" || item.durum === "2"
+      ? [
+          {
+            Icon: MdDelete,
+            label: "Sil",
+            onClick: () => openDeleteConfirmation(item),
+            dangerEffect: true,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -189,8 +192,8 @@ const ViewCounts: React.FC = () => {
       {isMobileView ? (
         <GenericCardList
           initialSortBy="bitis"
-          data={counts || []}
-          isLoading={isGetCountsLoading}
+          data={countList || []}
+          isLoading={isLCountList}
           columns={viewCountsColumns}
           titleKey="sayim_adi"
           cardDropdownOptions={createDropdownOptions}
@@ -198,8 +201,8 @@ const ViewCounts: React.FC = () => {
       ) : (
         <GenericTable
           initialSortBy="bitis"
-          data={counts || []}
-          isLoading={isGetCountsLoading}
+          data={countList || []}
+          isLoading={isLCountList}
           columns={viewCountsColumns}
           dropdownOptions={createDropdownOptions}
         />

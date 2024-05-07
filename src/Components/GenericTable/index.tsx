@@ -9,6 +9,8 @@ import { TableProps } from "./index.d";
 import { renderContent } from "../../Utils/renderContent";
 import { getInitialSortConfig } from "../../Utils/getInitialSortConfig";
 import Skeleton from "react-loading-skeleton";
+import AsyncIconButton from "../Buttons/AsyncIconButton";
+import { IoMdMore } from "react-icons/io";
 
 const TableHeaderCell: React.FC<{
   children: React.ReactNode;
@@ -44,8 +46,11 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
     initialSortBy,
     dropdownOptions,
     isLoading = false,
+    getTableActions,
   } = props;
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+  const [isActiveTableDropdown, setIsActiveTableDropdown] =
+    useState<boolean>(false);
 
   // Initial sorting configuration of the useSort hook
   const initialSortConfig = useMemo(
@@ -55,6 +60,12 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
   const { sortedItems, sortConfig, requestSort } = useSort<T>(
     data,
     initialSortConfig
+  );
+  // Determine if there are any dropdown options for any items
+  const showDropdownColumn = useMemo(
+    () =>
+      data.some((item) => dropdownOptions && dropdownOptions(item).length > 0),
+    [data, dropdownOptions]
   );
 
   return (
@@ -82,7 +93,29 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
         </>
       ) : data.length > 0 ? (
         <div>
-          <div className="font-light mb-2">{data.length} veri listeleniyor</div>
+          <div className="flex flex-row justify-between w-full mb-2">
+            <div className="font-light">{data.length} veri listeleniyor</div>
+            {getTableActions && (
+              <div className="relative">
+                <AsyncIconButton
+                  title="İşlemler"
+                  Icon={IoMdMore}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setIsActiveTableDropdown(!isActiveTableDropdown);
+                  }}
+                  className="pl-1"
+                />
+                {isActiveTableDropdown && (
+                  <DropdownMenu
+                    id={"table-actions"}
+                    options={getTableActions()}
+                    closeDropdown={() => setIsActiveTableDropdown(false)}
+                  />
+                )}
+              </div>
+            )}
+          </div>
           <table className="w-full border border-text-lighter dark:border-text-dark leading-normal transition-colors duration-300 ease-in-out">
             <thead>
               <tr className="bg-primary-lighter dark:bg-primary-darkest text-text-darkest dark:text-text-lightest transition-colors duration-300 ease-in-out ">
@@ -100,7 +133,9 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
                     {column.header}
                   </TableHeaderCell>
                 ))}
-                {dropdownOptions && <TableHeaderCell>İşlemler</TableHeaderCell>}
+                {showDropdownColumn && (
+                  <TableHeaderCell>İşlemler</TableHeaderCell>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -120,7 +155,7 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
                         : renderContent(item[column.key as keyof T])}
                     </TableCell>
                   ))}
-                  {dropdownOptions && dropdownOptions.length > 0 && (
+                  {showDropdownColumn && (
                     <TableCell>
                       <div className="relative inline-block">
                         <button
@@ -140,7 +175,7 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
                         </button>
                         {activeDropdown === rowIndex && (
                           <DropdownMenu
-                            options={dropdownOptions(item)}
+                            options={dropdownOptions!(item)}
                             closeDropdown={() => setActiveDropdown(null)}
                             id={rowIndex}
                           />

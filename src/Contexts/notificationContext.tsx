@@ -26,15 +26,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
-  const removeNotification = (id: number) => {
+  const removeNotification = (id: string) => {
     setNotifications((notifications) =>
       notifications.filter((notification) => notification.id !== id)
     );
   };
 
   const addNotification = (message: string, type: NotificationType) => {
-    const id = new Date().getTime();
+    const randomPart = Math.floor(Math.random() * 10000000);
+    const timestamp = new Date().getTime();
+    const id = `${timestamp}-${randomPart}`;
     const newNotification = { id, message, type };
+
     setNotifications((prev) => [newNotification, ...prev]);
     setTimeout(() => removeNotification(id), NOTIFICATION_TIMEOUT);
   };

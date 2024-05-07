@@ -136,7 +136,7 @@ const GenericCardList = <T extends {}>({
     ...(isSortableColumnPresent
       ? [{ text: "Sırala", onClick: () => setIsSortDialogOpen(true) }]
       : []),
-    ...(actions ?? []),
+    ...(actions ? actions() : []),
   ];
 
   // Initial sorting configuration of the useSort hook

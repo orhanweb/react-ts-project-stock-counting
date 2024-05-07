@@ -1,6 +1,7 @@
 import React, { ButtonHTMLAttributes } from "react";
 import { IconType } from "react-icons/lib";
 import { RotatingLines } from "react-loader-spinner";
+import { twMerge } from "tailwind-merge";
 
 interface AsyncIconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
@@ -15,6 +16,7 @@ const AsyncIconButton: React.FC<AsyncIconButtonProps> = ({
   Icon,
   iconSize = 20,
   children,
+  className,
   ...props
 }) => {
   if (!title && !Icon && !children) return null;
@@ -22,13 +24,15 @@ const AsyncIconButton: React.FC<AsyncIconButtonProps> = ({
   return (
     <button
       {...props}
-      className={`${
-        isLoading
-          ? "bg-background-light dark:bg-background cursor-not-allowed"
-          : "bg-primary-light dark:bg-primary-darkest hover:bg-primary dark:hover:bg-primary"
-      } min-w-[100px] py-2 px-4 rounded-lg text-text-darkest dark:text-text-lightest transition-all duration-300 ease-in-out ${
-        props.className
-      }`}
+      className={twMerge(
+        `${
+          isLoading
+            ? "bg-background-light dark:bg-background cursor-not-allowed"
+            : "bg-primary-light dark:bg-primary-darkest hover:bg-primary dark:hover:bg-primary"
+        } 
+        min-w-[100px] py-2 px-4 rounded-lg text-text-darkest dark:text-text-lightest transition-all duration-300 ease-in-out`,
+        className
+      )}
       disabled={isLoading}
     >
       {isLoading ? (

@@ -1,6 +1,6 @@
 // utils/formatTime.ts
 
-// Example output format => 2024-03-15 10:30:00, Incoming format classic Date Object
+//Incoming format classic Date Object, Example output format => 2024-03-15 10:30:00
 export function formatDateV1(date: Date): string {
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -13,7 +13,7 @@ export function formatDateV1(date: Date): string {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}.${ssssss}`;
 }
 
-// Example output format => 09:00 14/03/24, Incoming format => 2024-03-15 10:30:00 : string
+// Incoming format => 2024-03-15 10:30:00 : string, Example output format => 09:00 14/03/24
 export function formatDateV2(dateStr: string): string {
   const date = new Date(dateStr.replace(" ", "T") + "Z"); // Convert date string to ISO 8601 format and convert to UTC
   const hours = date.getUTCHours().toString().padStart(2, "0");
@@ -28,4 +28,13 @@ export function formatDateV2(dateStr: string): string {
 // Opposite of formatDateV1 function
 export function convertStringToDate(dateStr: string): Date {
   return new Date(dateStr.replace(" ", "T") + "Z");
+}
+
+// Incoming format => 2024-03-15: string, Example output format => 14/03/24
+export function formatDateV3(dateStr: string): string {
+  const date = new Date(dateStr);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // getMonth() starts at 0, it is necessary to add 1.
+  const year = date.getFullYear().toString().slice(2); // Gets the last two digits of the year.
+  return `${day}/${month}/${year}`;
 }
