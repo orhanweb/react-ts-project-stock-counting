@@ -5,6 +5,7 @@ import ViewCounts from "./Pages/ViewCounts";
 import AddProduct from "./Pages/Count/AddProduct";
 import ViewCounted from "./Pages/Count/ViewCounted";
 import NotFoundPage from "./Pages/NotFoundPage";
+import LabPage from "./Pages/Lab";
 
 const routes: RouteObject[] = [
   {
@@ -26,6 +27,10 @@ const routes: RouteObject[] = [
       {
         path: "count/:countID/view-counted",
         element: <ViewCounted />,
+      },
+      {
+        path: "count/:countID/lab",
+        element: <LabPage />,
       },
       // catch-all route for 404 page
       {

@@ -1,17 +1,14 @@
 import React from "react";
-import Select, { Props as SelectProps } from "react-select";
+import Select from "react-select";
 import CustomLabel from "../Labels/CustomLabel";
-
-interface AutoSelectProps extends SelectProps {
-  label?: string;
-}
+import { AutoSelectProps } from "./index.d";
 
 const AutoSelect: React.FC<AutoSelectProps> = (props) => {
   const { label, ...selectProps } = props;
 
   return (
     <div>
-      <CustomLabel title={label} className="block mb-2" />
+      {label && <CustomLabel title={label} className="block mb-2" />}
       <Select
         maxMenuHeight={200}
         menuPosition="fixed"
