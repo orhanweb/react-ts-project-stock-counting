@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNotifications } from "../../Hooks/useNotifications";
 import { NotificationType } from "../Notification/index.d";
-import AutoSelect from "../AutoSelect"; // Import AutoSelect component
+import AutoSelect from "../AutoSelect";
+import Quagga from "@ericblade/quagga2"; // 1. Quagga2'yi import etme
 
 interface BarcodeQRScannerProps {
   onClose: () => void;
@@ -34,10 +35,11 @@ const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({ onClose }) => {
         },
       })
       .then((stream) => {
-        setCameraPermissionDenied(false); // Kamera izni verildiğinde durumu sıfırlar
+        setCameraPermissionDenied(false);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        startQuagga();
       })
       .catch((_) => {
         setCameraPermissionDenied(true);
@@ -45,13 +47,55 @@ const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({ onClose }) => {
       });
   };
 
+  // Quagga'yı başlatma fonksiyonu
+  const startQuagga = () => {
+    if (videoRef.current) {
+      Quagga.init(
+        {
+          inputStream: {
+            type: "LiveStream",
+            target: videoRef.current,
+            constraints: {
+              facingMode: "environment",
+            },
+          },
+          decoder: {
+            readers: [
+              "code_128_reader",
+              "ean_reader",
+              "ean_8_reader",
+              "code_39_reader",
+              "code_39_vin_reader",
+              "codabar_reader",
+              "upc_reader",
+              "upc_e_reader",
+              "i2of5_reader",
+            ],
+          },
+        },
+        (err) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          Quagga.start();
+        }
+      );
+
+      Quagga.onDetected((result) => {
+        console.log("Barkod tespit edildi: ", result.codeResult.code); // 3. Barkodları konsola yazdırma
+      });
+    }
+  };
+
   // Kamera akışını durdurma fonksiyonu
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach((track) => track.stop());
-      videoRef.current.srcObject = null; // srcObject'u null yaparak kaynakları serbest bırakma
+      videoRef.current.srcObject = null;
     }
+    Quagga.stop(); // 2. Quagga2'yi durdurma
   };
 
   // Kamera cihazlarını listeleme ve başlangıçta kamera akışını başlatma
