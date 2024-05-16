@@ -2,13 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNotifications } from "../../Hooks/useNotifications";
 import { NotificationType } from "../Notification/index.d";
 import AutoSelect from "../AutoSelect";
-import Quagga from "@ericblade/quagga2"; // 1. Quagga2'yi import etme
+import Quagga from "@ericblade/quagga2";
+import jsQR from "jsqr";
 
 interface BarcodeQRScannerProps {
   onClose: () => void;
+  onDetected: (data: string) => void;
 }
 
-const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({ onClose }) => {
+let qrInterval: NodeJS.Timeout;
+
+const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({
+  onClose,
+  onDetected,
+}) => {
   const { addNotification } = useNotifications();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -16,89 +23,7 @@ const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({ onClose }) => {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
-  // Kamera akışını başlatma fonksiyonu
-  const startCamera = (deviceId?: string | null) => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraPermissionDenied(true);
-      addNotification(
-        "getUserMedia API'si bu tarayıcıda desteklenmiyor.",
-        NotificationType.Warning
-      );
-      return;
-    }
-
-    navigator.mediaDevices
-      .getUserMedia({
-        video: {
-          deviceId: deviceId ?? undefined,
-          facingMode: deviceId ? undefined : "environment",
-        },
-      })
-      .then((stream) => {
-        setCameraPermissionDenied(false);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        startQuagga();
-      })
-      .catch((_) => {
-        setCameraPermissionDenied(true);
-        addNotification("Kamera izni reddedildi.", NotificationType.Error);
-      });
-  };
-
-  // Quagga'yı başlatma fonksiyonu
-  const startQuagga = () => {
-    if (videoRef.current) {
-      Quagga.init(
-        {
-          inputStream: {
-            type: "LiveStream",
-            target: videoRef.current,
-            constraints: {
-              facingMode: "environment",
-            },
-          },
-          decoder: {
-            readers: [
-              "code_128_reader",
-              "ean_reader",
-              "ean_8_reader",
-              "code_39_reader",
-              "code_39_vin_reader",
-              "codabar_reader",
-              "upc_reader",
-              "upc_e_reader",
-              "i2of5_reader",
-            ],
-          },
-        },
-        (err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          Quagga.start();
-        }
-      );
-
-      Quagga.onDetected((result) => {
-        console.log("Barkod tespit edildi: ", result.codeResult.code); // 3. Barkodları konsola yazdırma
-      });
-    }
-  };
-
-  // Kamera akışını durdurma fonksiyonu
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
-    Quagga.stop(); // 2. Quagga2'yi durdurma
-  };
-
-  // Kamera cihazlarını listeleme ve başlangıçta kamera akışını başlatma
+  // List camera devices and start camera streaming on startup
   useEffect(() => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
       setCameraPermissionDenied(true);
@@ -123,7 +48,132 @@ const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({ onClose }) => {
     };
   }, [selectedDeviceId]);
 
-  // Bileşeni kapatma fonksiyonu
+  // Camera stream start function
+  const startCamera = (deviceId?: string | null) => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraPermissionDenied(true);
+      addNotification(
+        "getUserMedia API'si bu tarayıcıda desteklenmiyor.",
+        NotificationType.Warning
+      );
+      return;
+    }
+
+    navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          deviceId: deviceId ?? undefined,
+          facingMode: deviceId ? undefined : "environment",
+        },
+      })
+      .then((stream) => {
+        setCameraPermissionDenied(false);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        startScanning();
+      })
+      .catch((_) => {
+        setCameraPermissionDenied(true);
+        addNotification("Kamera izni reddedildi.", NotificationType.Error);
+      });
+  };
+
+  // Camera stream stop function
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    Quagga.stop();
+    clearInterval(qrInterval);
+  };
+
+  // Initialization function of both barcode and QR code scanning function
+  const startScanning = () => {
+    if (videoRef.current) {
+      Quagga.init(
+        {
+          inputStream: {
+            type: "LiveStream",
+            target: videoRef.current,
+            constraints: {
+              facingMode: "environment",
+            },
+          },
+          decoder: {
+            readers: [
+              "code_128_reader",
+              "ean_reader",
+              "ean_8_reader",
+              "code_39_reader",
+              "code_39_vin_reader",
+              "codabar_reader",
+              "upc_reader",
+              "upc_e_reader",
+              "i2of5_reader",
+              "2of5_reader",
+            ],
+          },
+        },
+        (err) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          Quagga.start();
+        }
+      );
+      // Barcode scanning is done here
+      Quagga.onDetected((result) => {
+        const code = result?.codeResult?.code;
+        if (code) {
+          handleDetected(code);
+        }
+      });
+      // QR code scanning is called here
+      qrInterval = setInterval(() => {
+        if (videoRef.current) {
+          const canvas = document.createElement("canvas");
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+          const context = canvas.getContext("2d");
+          if (context) {
+            context.drawImage(
+              videoRef.current,
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+            const imageData = context.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+            scanQRCode(imageData);
+          }
+        }
+      }, 150);
+    }
+  };
+  // QR code scanning is done here
+  const scanQRCode = (imageData: ImageData) => {
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code?.data) {
+      handleDetected(code.data);
+    }
+  };
+
+  // When there is any scanning
+  const handleDetected = (data: string) => {
+    closeScanner();
+    onDetected(data);
+  };
+
+  // Component shutdown function
   const closeScanner = () => {
     stopCamera();
     onClose();

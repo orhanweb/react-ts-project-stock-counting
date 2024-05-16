@@ -372,6 +372,7 @@ const AddProduct: React.FC = () => {
       {/* Barkod Scanner Component*/}
       {state.isShowBarcodeScanner && (
         <BarcodeQRScanner
+          onDetected={(data) => console.log("Deneme", data)}
           onClose={() => updateState("isShowBarcodeScanner", false)}
         />
       )}
