@@ -185,7 +185,7 @@ const BarcodeQRScanner: React.FC<BarcodeQRScannerProps> = ({
       onClick={closeScanner}
     >
       <div
-        className="overflow-hidden p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 w-[90%] max-h-[75%] md:w-[75%] md:max-h-[75%] lg:max-w-[50%] lg:max-h-[75%] flex flex-col justify-center items-center m-2 transition-all duration-300 ease-in-out"
+        className="overflow-hidden p-2 rounded-lg shadow-lg bg-background-lightest text-text-darkest dark:bg-background-darker dark:text-text-lightest z-50 w-fit max-h-[75%] md:w-fit md:max-w-[75%] md:max-h-[75%] lg:w-fit lg:max-w-[50%] lg:max-h-[75%] flex flex-col justify-center items-center m-2 transition-all duration-300 ease-in-out"
         onClick={(e) => e.stopPropagation()}
       >
         {!navigator.mediaDevices ||

@@ -23,8 +23,7 @@ import { useGetSessionQuery } from "../../../Redux/Services/sessionAPI";
 import { useStateManager } from "../../../Hooks/useStateManager";
 import { useErrorManager } from "../../../Hooks/useErrorManager";
 import { useLoadingManager } from "../../../Hooks/useLoadingManager";
-import { IoQrCode } from "react-icons/io5";
-import BarcodeQRScanner from "../../../Components/BarcodeQRScanner";
+import AutoBarcodeSelect from "../../../Components/AutoBarcodeSelect";
 
 interface AddProductState {
   redirectToNotFound: {
@@ -36,7 +35,6 @@ interface AddProductState {
   codeInput: string;
   stockQuantities: Record<string, string>;
   isShowBarcodeInput: boolean;
-  isShowBarcodeScanner: boolean;
 }
 
 const initialState: AddProductState = {
@@ -46,7 +44,6 @@ const initialState: AddProductState = {
   codeInput: "",
   stockQuantities: {},
   isShowBarcodeInput: true,
-  isShowBarcodeScanner: false,
 };
 
 const AddProduct: React.FC = () => {
@@ -270,43 +267,33 @@ const AddProduct: React.FC = () => {
           </div>
 
           {state.isShowBarcodeInput ? (
-            <div className="flex items-center gap-2 w-full">
-              <div className="flex-grow">
-                <AutoSelect
-                  id="product-barcode-selector"
-                  placeholder="Ürün barkodu..."
-                  isClearable
-                  required
-                  noOptionsMessage={() => "Minimum 3 karakter"}
-                  value={
-                    state.selectedProduct
-                      ? productOptions.find(
-                          (option) => option.value === state.selectedProduct?.id
-                        )
-                      : null
-                  }
-                  onInputChange={(inputValue) =>
-                    debouncedUpdateBarcode(inputValue)
-                  }
-                  options={productOptions}
-                  isLoading={isLProducts}
-                  onChange={(option: any) =>
-                    updateState(
-                      "selectedProduct",
-                      productsData?.find(
-                        (product) => product.id === option?.value
-                      ) || null
+            <AutoBarcodeSelect
+              id="product-barcode-selector"
+              placeholder="Ürün barkodu..."
+              isClearable
+              required
+              noOptionsMessage={() => "Minimum 3 karakter"}
+              value={
+                state.selectedProduct
+                  ? productOptions.find(
+                      (option) => option.value === state.selectedProduct?.id
                     )
-                  }
-                />
-              </div>
-              <AsyncIconButton
-                Icon={IoQrCode}
-                type="button"
-                onClick={() => updateState("isShowBarcodeScanner", true)}
-                className="min-w-fit"
-              />
-            </div>
+                  : null
+              }
+              onExternalInputChange={(inputValue) =>
+                debouncedUpdateBarcode(inputValue)
+              }
+              options={productOptions}
+              isLoading={isLProducts}
+              onChange={(option: any) =>
+                updateState(
+                  "selectedProduct",
+                  productsData?.find(
+                    (product) => product.id === option?.value
+                  ) || null
+                )
+              }
+            />
           ) : (
             <AutoSelect
               id="product-code-selector"
@@ -369,13 +356,6 @@ const AddProduct: React.FC = () => {
           Icon={IoIosAddCircle}
         />
       </form>
-      {/* Barkod Scanner Component*/}
-      {state.isShowBarcodeScanner && (
-        <BarcodeQRScanner
-          onDetected={(data) => console.log("Deneme", data)}
-          onClose={() => updateState("isShowBarcodeScanner", false)}
-        />
-      )}
     </div>
   );
 };
