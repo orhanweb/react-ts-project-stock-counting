@@ -24,6 +24,7 @@ import { useStateManager } from "../../../Hooks/useStateManager";
 import { useErrorManager } from "../../../Hooks/useErrorManager";
 import { useLoadingManager } from "../../../Hooks/useLoadingManager";
 import AutoBarcodeSelect from "../../../Components/AutoBarcodeSelect";
+import AccordionCard from "../../../Components/AccordionCard";
 
 interface AddProductState {
   redirectToNotFound: {
@@ -35,6 +36,7 @@ interface AddProductState {
   codeInput: string;
   stockQuantities: Record<string, string>;
   isShowBarcodeInput: boolean;
+  isAccordionOpen: boolean;
 }
 
 const initialState: AddProductState = {
@@ -44,6 +46,7 @@ const initialState: AddProductState = {
   codeInput: "",
   stockQuantities: {},
   isShowBarcodeInput: true,
+  isAccordionOpen: false,
 };
 
 const AddProduct: React.FC = () => {
@@ -220,6 +223,34 @@ const AddProduct: React.FC = () => {
     }
   };
 
+  const renderProductDetails = (product: Product) => {
+    const productDetails = [
+      { label: "Kod", value: product.code },
+      { label: "Barkod 1", value: product.barcode1 },
+      { label: "Barkod 2", value: product.barcode2 },
+      { label: "Barkod 3", value: product.barcode3 },
+      { label: "Birim", value: product.unit },
+      { label: "Birim Mult", value: product.unitmult },
+      { label: "Birim 2", value: product.unit2 },
+      { label: "Birim 2 Mult", value: product.unit2mult },
+      { label: "Birim 3", value: product.unit3 },
+      { label: "Birim 3 Mult", value: product.unit3mult },
+    ];
+
+    return (
+      <ul className="list-disc list-inside space-y-2">
+        {productDetails
+          .filter((detail) => detail.value) // Boş değerleri filtrele
+          .map((detail, index) => (
+            <li key={index}>
+              <span className="opacity-75">{detail.label}: </span>
+              {detail.value}
+            </li>
+          ))}
+      </ul>
+    );
+  };
+
   return (
     <div id="add-product-page" className="w-full lg:w-3/4 mx-auto">
       {state.redirectToNotFound.active && (
@@ -322,6 +353,18 @@ const AddProduct: React.FC = () => {
             />
           )}
         </div>
+        {state.selectedProduct && (
+          <AccordionCard
+            title={state.selectedProduct.name}
+            isOpen={state.isAccordionOpen}
+            onClick={() =>
+              updateState("isAccordionOpen", !state.isAccordionOpen)
+            }
+          >
+            {renderProductDetails(state.selectedProduct)}
+          </AccordionCard>
+        )}
+
         <Subtitle text={t("add-product.sub-title-3")} />
         <div id="entering-stock" className="w-full">
           {state.selectedProduct ? (

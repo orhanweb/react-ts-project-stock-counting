@@ -19,7 +19,7 @@ const AccordionCard: React.FC<AccordionCardProps> = ({
       }  py-2 px-4 rounded-xl flex flex-col card centered-shadow cursor-default bg-background-lightest dark:bg-background-darkest text-text-darkest dark:text-text-lightest break-words transition-all duration-300`}
     >
       <div
-        className="flex justify-between items-center text-lg font-bold my-2"
+        className="flex justify-between items-center text-lg font-bold py-2"
         onClick={onClick}
       >
         {title}
