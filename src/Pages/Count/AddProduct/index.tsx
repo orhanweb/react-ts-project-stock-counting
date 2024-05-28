@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useMemo } from "react";
+import React, { FormEvent, useCallback, useEffect, useMemo } from "react";
 
 import AsyncIconButton from "../../../Components/Buttons/AsyncIconButton";
 import { IoIosAddCircle } from "react-icons/io";
@@ -25,6 +25,7 @@ import { useErrorManager } from "../../../Hooks/useErrorManager";
 import { useLoadingManager } from "../../../Hooks/useLoadingManager";
 import AutoBarcodeSelect from "../../../Components/AutoBarcodeSelect";
 import AccordionCard from "../../../Components/AccordionCard";
+import AddedProductList, { AddedProduct } from "./AddedProductList";
 
 interface AddProductState {
   redirectToNotFound: {
@@ -37,6 +38,7 @@ interface AddProductState {
   stockQuantities: Record<string, string>;
   isShowBarcodeInput: boolean;
   isAccordionOpen: boolean;
+  addedProducts: AddedProduct[];
 }
 
 const initialState: AddProductState = {
@@ -47,6 +49,7 @@ const initialState: AddProductState = {
   stockQuantities: {},
   isShowBarcodeInput: true,
   isAccordionOpen: false,
+  addedProducts: [],
 };
 
 const AddProduct: React.FC = () => {
@@ -177,13 +180,19 @@ const AddProduct: React.FC = () => {
     updateState("isShowBarcodeInput", !state.isShowBarcodeInput);
   };
 
-  const debouncedUpdateBarcode = debounce((value) => {
-    updateState("barcodeInput", value);
-  }, 500);
+  const debouncedUpdateBarcode = useCallback(
+    debounce((value) => {
+      updateState("barcodeInput", value);
+    }, 500),
+    []
+  );
 
-  const debouncedUpdateCode = debounce((value) => {
-    updateState("codeInput", value);
-  }, 500);
+  const debouncedUpdateCode = useCallback(
+    debounce((value) => {
+      updateState("codeInput", value);
+    }, 500),
+    []
+  );
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -201,19 +210,27 @@ const AddProduct: React.FC = () => {
       return acc;
     }, {});
 
-    // Form verisini oluştur
+    // Create form value
     const formData: AddProductToCount = {
       sayim_id: countDetails.sayim_id,
       depos_id: countDetails.depo_id,
       code: state.selectedProduct.code, // product code
-      inv_id: state.selectedProduct.id, // product value
+      inv_id: state.selectedProduct.id, // product id
       user_id: parseInt(sessionData.id.toString()),
+      stockData: filteredStockData,
+    };
+
+    const newProduct: AddedProduct = {
+      barcode: state.selectedProduct.barcode1,
+      name: state.selectedProduct.name,
       stockData: filteredStockData,
     };
 
     try {
       await addProduct(formData).unwrap();
       addNotification(t("add-product.added-product"), NotificationType.Success);
+      // Add the newly added product to the list
+      updateState("addedProducts", [newProduct, ...state.addedProducts]);
       // Reset product for next adding
       updateState("selectedProduct", null);
     } catch (error) {
@@ -303,7 +320,11 @@ const AddProduct: React.FC = () => {
               placeholder="Ürün barkodu..."
               isClearable
               required
-              noOptionsMessage={() => "Minimum 3 karakter"}
+              noOptionsMessage={(obj) =>
+                obj.inputValue.length < 3
+                  ? "Minimum 3 karakter"
+                  : "Aradığınız ürün bulunamadı"
+              }
               value={
                 state.selectedProduct
                   ? productOptions.find(
@@ -331,7 +352,11 @@ const AddProduct: React.FC = () => {
               placeholder="Ürün kodu veya adı..."
               isClearable
               required
-              noOptionsMessage={() => "Minimum 3 karakter"}
+              noOptionsMessage={(obj) =>
+                obj.inputValue.length < 3
+                  ? "Minimum 3 karakter"
+                  : "Aradığınız ürün bulunamadı"
+              }
               value={
                 state.selectedProduct
                   ? productOptionsForCode.find(
@@ -399,6 +424,9 @@ const AddProduct: React.FC = () => {
           Icon={IoIosAddCircle}
         />
       </form>
+      {state.addedProducts.length > 0 && (
+        <AddedProductList addedProducts={state.addedProducts} />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-// src/Components/GenericTable/index.d.ts
+import { SortDirection } from "../../Hooks/useSort";
 export interface TableColumn<T> {
   key: keyof T;
   header: string;
@@ -9,7 +9,7 @@ export interface TableColumn<T> {
 export interface TableProps<T> {
   data: T[];
   columns: TableColumn<T>[];
-  initialSortBy?: keyof T;
+  initialSortBy?: { key: keyof T; direction: SortDirection };
   dropdownOptions?: (item: T) => DropdownOption[];
   isLoading?: boolean;
   getTableActions?: () => DropdownOption[];

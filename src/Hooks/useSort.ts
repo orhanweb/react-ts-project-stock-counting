@@ -21,16 +21,15 @@ const useSort = <T extends {}>(
     useState<SortConfig<T>>(initialSortConfig);
 
   // Sorting request function
-  const requestSort = (sortBy: keyof T) => {
-    let direction = SortDirection.ASCENDING;
-    if (
-      sortConfig &&
+  const requestSort = (sortBy: keyof T, direction?: SortDirection) => {
+    const newDirection =
+      direction ??
+      (sortConfig &&
       sortConfig.sortBy === sortBy &&
       sortConfig.direction === SortDirection.ASCENDING
-    ) {
-      direction = SortDirection.DESCENDING;
-    }
-    setSortConfig({ sortBy, direction });
+        ? SortDirection.DESCENDING
+        : SortDirection.ASCENDING);
+    setSortConfig({ sortBy, direction: newDirection });
   };
 
   // Sorting process

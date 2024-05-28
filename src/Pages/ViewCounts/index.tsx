@@ -22,6 +22,7 @@ import { FaPlay } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { useLoadingManager } from "../../Hooks/useLoadingManager";
 import { useErrorManager } from "../../Hooks/useErrorManager";
+import { SortDirection } from "../../Hooks/useSort";
 
 // An object to control dialog states
 const initialDialogState = {
@@ -191,7 +192,7 @@ const ViewCounts: React.FC = () => {
       />
       {isMobileView ? (
         <GenericCardList
-          initialSortBy="bitis"
+          initialSortBy={{ key: "bitis", direction: SortDirection.ASCENDING }}
           data={countList || []}
           isLoading={isLCountList}
           columns={viewCountsColumns}
@@ -200,7 +201,7 @@ const ViewCounts: React.FC = () => {
         />
       ) : (
         <GenericTable
-          initialSortBy="bitis"
+          initialSortBy={{ key: "bitis", direction: SortDirection.ASCENDING }}
           data={countList || []}
           isLoading={isLCountList}
           columns={viewCountsColumns}

@@ -10,6 +10,7 @@ export interface DialogProps {
   cancelButtonLabel?: string;
   confirmButtonLabel?: string;
   isDeactivateCloseAfterConfirm?: boolean;
+  isDeactivateCloseAfterCancel?: boolean;
 }
 
 export enum DialogType {

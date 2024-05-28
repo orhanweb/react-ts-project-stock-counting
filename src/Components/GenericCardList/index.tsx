@@ -1,17 +1,17 @@
 import { GenericCardListProps } from "./index.d";
 import { renderContent } from "../../Utils/renderContent";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import AccordionCard from "../AccordionCard";
 import ActionBar from "../ActionBar";
 import DropdownMenu from "../DropdownMenu";
 import { ActionButtonProps } from "../ActionBar/index.d";
-import Dialog from "../CustomDialog";
 import { getInitialSortConfig } from "../../Utils/getInitialSortConfig";
-import useSort, { SortConfig, SortDirection } from "../../Hooks/useSort";
-import { FaCircleArrowDown, FaCircleArrowUp } from "react-icons/fa6";
+import useSort from "../../Hooks/useSort";
 import { motion } from "framer-motion";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import SortDialog from "./Modals/SortDialog";
+import FilterDialog from "./Modals/FilterDialog";
 
 const GenericCardList = <T extends {}>({
   data,
@@ -28,9 +28,8 @@ const GenericCardList = <T extends {}>({
     null
   );
   const [isSortDialogOpen, setIsSortDialogOpen] = useState<boolean>(false);
-  const [tempSortConfig, setTempSortConfig] = useState<SortConfig<T> | null>(
-    null
-  );
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState<boolean>(false);
+  const [filteredData, setFilteredData] = useState<T[]>(data);
 
   const toggleCard = (index: number) => {
     setOpenCardIndex((prevIndex) => (prevIndex === index ? null : index));
@@ -53,80 +52,6 @@ const GenericCardList = <T extends {}>({
     () => columns.filter((column) => column.sortable),
     [columns]
   );
-
-  // Selection logic for the column to sort
-  const handleSortSelection = (columnKey: keyof T) => {
-    setTempSortConfig((prevConfig) => {
-      if (sortConfig.sortBy === columnKey && !prevConfig) {
-        // If already sorted column is selected
-        return {
-          sortBy: columnKey,
-          direction:
-            sortConfig.direction === SortDirection.ASCENDING
-              ? SortDirection.DESCENDING
-              : SortDirection.ASCENDING,
-        };
-      } else {
-        // If the same column is selected, change direction
-        return prevConfig && prevConfig.sortBy === columnKey
-          ? {
-              sortBy: columnKey,
-              direction:
-                prevConfig.direction === SortDirection.ASCENDING
-                  ? SortDirection.DESCENDING
-                  : SortDirection.ASCENDING,
-            }
-          : { sortBy: columnKey, direction: SortDirection.ASCENDING };
-      }
-    });
-  };
-
-  // Set temporary sorting state to null when dialog is opened and closed
-  useEffect(() => setTempSortConfig(null), [isSortDialogOpen]);
-
-  // Button coloring for sorted column
-  const getButtonStyle = (columnKey: keyof T) => {
-    const activeConfig = tempSortConfig || sortConfig;
-    const isActive = activeConfig && activeConfig.sortBy === columnKey;
-    return isActive ? "border-primary text-primary" : "border-background";
-  };
-
-  // Function that returns ascending and descending icons for the sorted column
-  const getSortIcon = (columnKey: keyof T) => {
-    const activeConfig = tempSortConfig || sortConfig;
-    if (activeConfig && activeConfig.sortBy === columnKey) {
-      return activeConfig.direction === SortDirection.ASCENDING ? (
-        <FaCircleArrowDown />
-      ) : (
-        <FaCircleArrowUp />
-      );
-    }
-    return null;
-  };
-
-  // Function that takes keys in columns and returns headers
-  const getColumnHeaderByKey = (key: keyof T) => {
-    const column = columns.find((c) => c.key === key);
-    return column ? column.header : "";
-  };
-
-  // Function that gives description text in sorting
-  const getSortingStatusText = () => {
-    if (!sortConfig && !tempSortConfig) return null;
-
-    return tempSortConfig
-      ? tempSortConfig.sortBy === sortConfig?.sortBy
-        ? tempSortConfig.direction !== sortConfig?.direction
-          ? "Sıralanan sütun aynı, sadece yönü değişecektir."
-          : "Sıralama değişmeyecektir."
-        : `Sıralama, ${getColumnHeaderByKey(
-            tempSortConfig.sortBy
-          )} sütununa göre yapılacaktır.`
-      : `Şuanda sıralama ${getColumnHeaderByKey(
-          sortConfig.sortBy
-        )} sütununa göre yapılmaktadır.`;
-  };
-
   // ActionBar buttons
   const actionBarButtons: ActionButtonProps[] = [
     {
@@ -136,12 +61,18 @@ const GenericCardList = <T extends {}>({
     ...(isSortableColumnPresent
       ? [{ text: "Sırala", onClick: () => setIsSortDialogOpen(true) }]
       : []),
+    { text: "Filtrele", onClick: () => setIsFilterDialogOpen(true) },
     ...(actions ? actions() : []),
   ];
 
   // Initial sorting configuration of the useSort hook
   const initialSortConfig = useMemo(
-    () => getInitialSortConfig(columns, initialSortBy),
+    () =>
+      getInitialSortConfig(
+        columns,
+        initialSortBy?.key,
+        initialSortBy?.direction
+      ),
     [initialSortBy, columns]
   );
   const { sortedItems, sortConfig, requestSort } = useSort<T>(
@@ -206,7 +137,10 @@ const GenericCardList = <T extends {}>({
         <div className="flex flex-col gap-2">
           <ActionBar buttons={actionBarButtons} />
           {data && (
-            <div className="font-light">{data.length} veri listeleniyor</div>
+            <div className="font-light">
+              {data.length} veriden <strong>{filteredData.length}</strong> veri
+              listeleniyor
+            </div>
           )}
           <motion.div
             className="flex flex-col gap-4"
@@ -214,58 +148,64 @@ const GenericCardList = <T extends {}>({
             animate="visible"
             variants={listVariants}
           >
-            {sortedItems.map((item, index) => (
-              <motion.div key={index} variants={cardVariants}>
-                <AccordionCard
-                  key={index}
-                  title={renderTitle(item)}
-                  isOpen={isAllCardOpen || index === openCardIndex}
-                  onClick={() => toggleCard(index)}
-                >
-                  {columns.map(
-                    (column, colIndex) =>
-                      column.key !== titleKey && (
-                        <span key={colIndex} className="block">
-                          <span className="">{column.header}:</span>&nbsp;
-                          {column.render ? (
-                            <span className="font-bold">
-                              {column.render(item)}
-                            </span>
-                          ) : (
-                            <strong>
-                              {renderContent(item[column.key as keyof T])}
-                            </strong>
-                          )}
-                        </span>
-                      )
-                  )}
-                  {cardDropdownOptions &&
-                    cardDropdownOptions(item).length > 0 && (
-                      <div className="relative inline-block mt-2 ">
-                        <button
-                          className={` px-4 py-2 rounded-lg cursor-default text-sm whitespace-nowrap transition ease-in-out duration-300 bg-primary hover:bg-primary-lighter dark:hover:bg-primary-darker text-text-darkest dark:text-text-lightest`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setActiveDropdownIndex(
-                              activeDropdownIndex === index ? null : index
-                            );
-                          }}
-                        >
-                          İşlemler
-                        </button>
-
-                        {activeDropdownIndex === index && (
-                          <DropdownMenu
-                            id={`card-dropdown-${index}`}
-                            options={cardDropdownOptions(item)}
-                            closeDropdown={() => setActiveDropdownIndex(null)}
-                          />
-                        )}
-                      </div>
+            {filteredData.length > 0 ? (
+              filteredData.map((item, index) => (
+                <motion.div key={index} variants={cardVariants}>
+                  <AccordionCard
+                    key={index}
+                    title={renderTitle(item)}
+                    isOpen={isAllCardOpen || index === openCardIndex}
+                    onClick={() => toggleCard(index)}
+                  >
+                    {columns.map(
+                      (column, colIndex) =>
+                        column.key !== titleKey && (
+                          <span key={colIndex} className="block">
+                            <span className="">{column.header}:</span>&nbsp;
+                            {column.render ? (
+                              <span className="font-bold">
+                                {column.render(item)}
+                              </span>
+                            ) : (
+                              <strong>
+                                {renderContent(item[column.key as keyof T])}
+                              </strong>
+                            )}
+                          </span>
+                        )
                     )}
-                </AccordionCard>
-              </motion.div>
-            ))}
+                    {cardDropdownOptions &&
+                      cardDropdownOptions(item).length > 0 && (
+                        <div className="relative inline-block mt-2 ">
+                          <button
+                            className={` px-4 py-2 rounded-lg cursor-default text-sm whitespace-nowrap transition ease-in-out duration-300 bg-primary hover:bg-primary-lighter dark:hover:bg-primary-darker text-text-darkest dark:text-text-lightest`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setActiveDropdownIndex(
+                                activeDropdownIndex === index ? null : index
+                              );
+                            }}
+                          >
+                            İşlemler
+                          </button>
+
+                          {activeDropdownIndex === index && (
+                            <DropdownMenu
+                              id={`card-dropdown-${index}`}
+                              options={cardDropdownOptions(item)}
+                              closeDropdown={() => setActiveDropdownIndex(null)}
+                            />
+                          )}
+                        </div>
+                      )}
+                  </AccordionCard>
+                </motion.div>
+              ))
+            ) : (
+              <span className="text-xl opacity-50 text-center cursor-default">
+                Aradığınız kriterlere göre veri bulunamadı
+              </span>
+            )}
           </motion.div>
         </div>
       ) : (
@@ -281,46 +221,20 @@ const GenericCardList = <T extends {}>({
           </button>
         </div>
       )}
-      <Dialog
-        title="Sırala"
-        confirmButtonLabel="Sırala"
-        isOpen={isSortDialogOpen}
-        onClose={() => setIsSortDialogOpen(false)}
-        onConfirm={() =>
-          tempSortConfig &&
-          (tempSortConfig.sortBy !== sortConfig.sortBy ||
-            tempSortConfig.direction !== sortConfig.direction) &&
-          requestSort(tempSortConfig.sortBy)
-        }
-      >
-        <div>
-          <div className="text-sm font-light mb-2">
-            Sıralamak istediğiniz sütunu seçin.
-          </div>
-          <div className="flex flex-col gap-2">
-            {sortableColumns.map((column, index) => (
-              <button
-                type="button"
-                key={index}
-                onClick={() => handleSortSelection(column.key)}
-                className={`px-4 py-3 text-left w-full text-sm font-medium border ${getButtonStyle(
-                  column.key
-                )} border-background rounded-lg`}
-              >
-                <div className="flex justify-between items-center">
-                  {column.header}
-                  {getSortIcon(column.key)}
-                </div>
-              </button>
-            ))}
-          </div>
-          {getSortingStatusText() && (
-            <div className="text-sm font-light mt-2">
-              {getSortingStatusText()}
-            </div>
-          )}
-        </div>
-      </Dialog>
+      <SortDialog
+        sortableColumns={sortableColumns}
+        isSortDialogOpen={isSortDialogOpen}
+        sortConfig={sortConfig}
+        setIsSortDialogOpen={setIsSortDialogOpen}
+        requestSort={requestSort}
+      />
+      <FilterDialog
+        isFilterDialogOpen={isFilterDialogOpen}
+        setIsFilterDialogOpen={setIsFilterDialogOpen}
+        columns={columns}
+        data={sortedItems}
+        onFilter={setFilteredData}
+      />
     </div>
   );
 };

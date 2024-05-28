@@ -23,6 +23,7 @@ import { useErrorManager } from "../../../Hooks/useErrorManager";
 import { useStateManager } from "../../../Hooks/useStateManager";
 import { DropdownOption } from "../../../Components/DropdownMenu/index.d";
 import CountDetailsCard from "./CountDetailsCard";
+import { SortDirection } from "../../../Hooks/useSort";
 
 interface ViewCountedState {
   isMobileView: boolean;
@@ -210,6 +211,7 @@ const ViewCounted: React.FC = () => {
       {state.isMobileView ? (
         <GenericCardList
           data={countedProducts?.sayilan_urunler || []}
+          initialSortBy={{ key: "time", direction: SortDirection.DESCENDING }}
           isLoading={isLCountedProducts}
           columns={columns}
           titleKey={"urun_adi"}
@@ -224,6 +226,7 @@ const ViewCounted: React.FC = () => {
       ) : (
         <GenericTable
           data={countedProducts?.sayilan_urunler || []}
+          initialSortBy={{ key: "time", direction: SortDirection.DESCENDING }}
           isLoading={isLCountedProducts}
           columns={columns}
           dropdownOptions={dropdownOptions}

@@ -63,7 +63,12 @@ const GenericTable = <T extends {}>(props: TableProps<T>) => {
 
   // Initial sorting configuration of the useSort hook
   const initialSortConfig = useMemo(
-    () => getInitialSortConfig(columns, initialSortBy),
+    () =>
+      getInitialSortConfig(
+        columns,
+        initialSortBy?.key,
+        initialSortBy?.direction
+      ),
     [initialSortBy, columns]
   );
   const { sortedItems, sortConfig, requestSort } = useSort<T>(

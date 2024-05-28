@@ -33,6 +33,7 @@ const Dialog: FC<DialogProps> = ({
   onConfirm,
   onCancel,
   isDeactivateCloseAfterConfirm = false,
+  isDeactivateCloseAfterCancel = false,
   cancelButtonLabel = "Vazgeç",
   confirmButtonLabel = "Onayla",
   dialogType = DialogType.Classic,
@@ -45,7 +46,9 @@ const Dialog: FC<DialogProps> = ({
 
   const handleCancel = () => {
     onCancel?.();
-    onClose();
+    if (!isDeactivateCloseAfterCancel) {
+      onClose();
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
