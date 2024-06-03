@@ -1,7 +1,7 @@
 import React, { FC, FormEvent } from "react";
-import { IoCloseCircle } from "react-icons/io5";
 import { AnimatePresence, motion } from "framer-motion";
 import { DialogProps, DialogType } from "./index.d";
+import { FaTimesCircle } from "react-icons/fa";
 
 // Special classifications for specific modal cards
 const dialogTypeClasses = {
@@ -98,7 +98,7 @@ const Dialog: FC<DialogProps> = ({
               <h2 className="text-xl">{title}</h2>
               {/* Dialog Close Button */}
               <button className="cursor-pointer" onClick={onClose}>
-                <IoCloseCircle
+                <FaTimesCircle
                   size={36}
                   className={"text-error hover:text-opacity-70"}
                 />

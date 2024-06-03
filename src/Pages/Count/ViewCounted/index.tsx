@@ -34,6 +34,14 @@ const initialState: ViewCountedState = {
   isCardOpen: false,
 };
 
+const formatCost = (value: string) => {
+  const numericValue = parseFloat(value.replace(/[^\d.-]/g, ""));
+  const formattedValue = numericValue
+    .toFixed(4)
+    .replace(/(\.0+|(?<=\.\d)0+)$/, "");
+  return `${formattedValue}₺`;
+};
+
 const ViewCounted: React.FC = () => {
   const { countID } = useParams<{ countID?: string }>();
   const { addNotification } = useNotifications();
@@ -132,8 +140,12 @@ const ViewCounted: React.FC = () => {
             { header: "Farklı Sayım Noktası", key: "farkli_sayim_noktasi" },
             { header: "Toplam Miktar", key: "toplam_miktar" },
             { header: "Ana Birim", key: "ana_birim" },
-            { header: "Birim Fiyat", key: "birim_fiyat" },
-            { header: "Toplam Tutar", key: "tutar" },
+            {
+              header: "Birim Fiyat",
+              key: "birim_fiyat",
+              formatter: formatCost,
+            },
+            { header: "Toplam Tutar", key: "tutar", formatter: formatCost },
             { header: "Kayıt Tarihi", key: "date", formatter: formatDateV2 },
           ],
         });

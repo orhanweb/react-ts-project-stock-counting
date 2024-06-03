@@ -192,7 +192,7 @@ const ViewCounts: React.FC = () => {
       />
       {isMobileView ? (
         <GenericCardList
-          initialSortBy={{ key: "bitis", direction: SortDirection.ASCENDING }}
+          initialSortBy={{ key: "bitis", direction: SortDirection.DESCENDING }}
           data={countList || []}
           isLoading={isLCountList}
           columns={viewCountsColumns}
@@ -201,7 +201,7 @@ const ViewCounts: React.FC = () => {
         />
       ) : (
         <GenericTable
-          initialSortBy={{ key: "bitis", direction: SortDirection.ASCENDING }}
+          initialSortBy={{ key: "bitis", direction: SortDirection.DESCENDING }}
           data={countList || []}
           isLoading={isLCountList}
           columns={viewCountsColumns}
