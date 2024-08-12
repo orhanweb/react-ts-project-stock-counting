@@ -142,7 +142,7 @@ const AddProduct: React.FC = () => {
   useEffect(() => {
     const newStockQuantities: Record<string, string> = {};
     if (state.selectedProduct) {
-      // Ürün değiştiğinde stok miktarlarını sıfırla
+      // Reset stock quantities when product changes
       if (state.selectedProduct.unit)
         newStockQuantities[state.selectedProduct.unit] = "";
       if (state.selectedProduct.unit2)
@@ -150,7 +150,7 @@ const AddProduct: React.FC = () => {
       if (state.selectedProduct.unit3)
         newStockQuantities[state.selectedProduct.unit3] = "";
     }
-    updateState("stockQuantities", newStockQuantities); // Eğer seçili ürün yoksa listeyi direkt boşaltır.
+    updateState("stockQuantities", newStockQuantities);
   }, [state.selectedProduct]);
 
   // --- FUNCTIONS
@@ -257,7 +257,7 @@ const AddProduct: React.FC = () => {
     return (
       <ul className="list-disc list-inside space-y-2">
         {productDetails
-          .filter((detail) => detail.value) // Boş değerleri filtrele
+          .filter((detail) => detail.value) // Filter empty values
           .map((detail, index) => (
             <li key={index}>
               <span className="opacity-75">{detail.label}: </span>
@@ -363,7 +363,7 @@ const AddProduct: React.FC = () => {
                       (option) => option.value === state.selectedProduct?.id
                     )
                   : null
-              } // Seçilen ürünü göster
+              } // Show selected product
               onInputChange={(inputValue) => debouncedUpdateCode(inputValue)}
               options={productOptionsForCode}
               isLoading={isLProductsForCode}

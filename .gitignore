@@ -25,3 +25,6 @@ dist-ssr
 
 localhost.pem
 localhost-key.pem
+
+# Config file
+src/config.ts

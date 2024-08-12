@@ -186,7 +186,7 @@ const ViewCounted: React.FC = () => {
 
   const dropdownOptions = useCallback(
     (item: ViewCountedProducts): DropdownOption[] => {
-      // countDetails.durum değerini doğrudan string olarak "1" ile karşılaştır
+      // Compare countDetails.status directly to string "1"
       if (countDetails && countDetails.durum === "1") {
         return [
           {
@@ -198,7 +198,7 @@ const ViewCounted: React.FC = () => {
           },
         ];
       }
-      return []; // Sayım durumu "1" değilse boş dizi döndür
+      return []; // Return empty array if count status is not "1"
     },
     [countDetails]
   );
