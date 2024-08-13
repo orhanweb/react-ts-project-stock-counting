@@ -1,19 +1,13 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 
-import { countLocationAPI } from "./Services/countLocationAPI";
-import { countFormAPI } from "./Services/countFormAPI";
-import { userAPI } from "./Services/userAPI"; // Güncellenmiş import
-import { productAPI } from "./Services/productAPI"; // Yeni import
-import { sessionAPI } from "./Services/sessionAPI"; // Güncellenmiş import
+import { countLocationAPI } from './Services/countLocationAPI';
+import { countFormAPI } from './Services/countFormAPI';
+import { userAPI } from './Services/userAPI';
+import { productAPI } from './Services/productAPI';
+import { sessionAPI } from './Services/sessionAPI';
 
-const rtkQueryMiddleware = [
-  countLocationAPI.middleware,
-  countFormAPI.middleware,
-  userAPI.middleware,
-  productAPI.middleware,
-  sessionAPI.middleware,
-];
+const rtkQueryMiddleware = [countLocationAPI.middleware, countFormAPI.middleware, userAPI.middleware, productAPI.middleware, sessionAPI.middleware];
 
 export const store = configureStore({
   reducer: {
@@ -23,8 +17,7 @@ export const store = configureStore({
     [productAPI.reducerPath]: productAPI.reducer,
     [sessionAPI.reducerPath]: sessionAPI.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(rtkQueryMiddleware),
+  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(rtkQueryMiddleware),
 });
 
 // Listener
